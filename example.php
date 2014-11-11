@@ -1,6 +1,5 @@
 <?php
 # Example for class DbUtils
-# Version 0.6
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 header('Content-Type: text/html; charset=utf-8');
 ini_set("display_errors", 1);
