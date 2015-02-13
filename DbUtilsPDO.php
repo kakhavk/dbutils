@@ -27,6 +27,10 @@ class DbUtils {
         return $this->hiDbType;
     }
     
+    function retPdoDriverName($conn){
+		return $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
+	}
+    
     /* Create connection */
     function dbConnect($host, $user, $pass, $dbname) {
         
