@@ -27,8 +27,19 @@ class DbUtils {
         return $this->hiDbType;
     }
     
-    function retPdoDriverName($conn){
-		return $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
+    function databaseConnectionAttributes($conn, $attributeName=""){
+		$returnStr="";
+		
+		$pdoAttributes=array("Case"=>"CASE", "Client Version"=>"CLIENT_VERSION","Connection Status"=>"CONNECTION_STATUS","Driver Name"=>"DRIVER_NAME","Error Mode"=>"ERRMODE","ORACLE Nulls"=>"ORACLE_NULLS", "Persistent"=>"PERSISTENT","Server info"=>"SERVER_INFO","Server Version"=>"SERVER_VERSION");
+		if(isset($attributeName) && !is_null($attributeName) && trim($attributeName)!==""){
+			$returnStr=$conn->getAttribute(constant("PDO::ATTR_$attributeName"));
+		}else{
+			foreach($pdoAttributes as $k => $v){
+				if(!is_null($conn->getAttribute(constant("PDO::ATTR_$v"))))
+					$returnStr.="<br /><br /><span style=\"color:navy;\">".$k."</span><br />".$conn->getAttribute(constant("PDO::ATTR_$v"));
+			}
+		}
+		return $returnStr;
 	}
     
     /* Create connection */
