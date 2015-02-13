@@ -119,7 +119,6 @@ if(trim($erStr)==""){
     }
     
     if(trim($erStr)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
-    echo "E";
         $id=$dbUtils->retNextval($conn, 'users_id_seq');
         $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->parsStrNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
         $dbUtils->execSqlInsert($conn, $sqlStr);
@@ -135,7 +134,7 @@ if(trim($erStr)==""){
         " where id=".$id;
         
         $dbUtils->execSqlUpdate($conn, $sqlStr);
-        echo "<script type=\"text/javascript\">    gotoPage(); </script>";
+        echo "<script type=\"text/javascript\"> gotoPage(); </script>";
     }
 }
 
