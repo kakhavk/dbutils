@@ -7,7 +7,7 @@
 class DbUtils {
 
     private $hiDbType; /* mysql, pgsql */
-    public $erStr=null; //Error return variable
+    public $erStr=null; //variable for error messages
 
     function __construct() {
         $this->hiDbType="";
