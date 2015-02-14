@@ -1,4 +1,5 @@
 <?php
+
 # Database PDO utilities for MySQL and PostgreSQL
 # Version 0.6
 # Writen By Kakhaber Kashmadze <info@soft.ge>
