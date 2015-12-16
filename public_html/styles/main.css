@@ -1,0 +1,27 @@
+body{
+	font-family:Sans, Verdana, Arial;
+	font-size: 13px;
+}
+
+body #content{
+	margin:10px;
+}
+
+#topnav{
+	width:100%; 
+	padding:5px 0 5px 0;
+}
+
+#topnav .navmenuitem{
+	float:left; 
+	margin-left:10px;
+}
+
+#topnav .topnavseparator{
+	float:left; 
+	margin-top:2px; 
+	margin-left:10px; 
+	width:1px; 
+	height:15px; 
+	background-color:grey;
+}
