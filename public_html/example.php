@@ -2,70 +2,10 @@
 # Example for class DbUtils
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 
-
 $title="DbUtilsPDO Example Script";
 require_once 'header.php';
 ?>
 <div id="content">
-
-header('Content-Type: text/html; charset=utf-8');
-ini_set("display_errors", 1);
-
-require_once 'conf.php';
-
-$rows=array();
-$rowsCount=0;
-$sqlStr="";
-$i=0;
-$erStr="";
-
-$tablename="users";
-
-$id=0;
-$lname=null;
-$fname=null;
-$email=null;
-$active=true;
-
-$min=0;
-$max=100;
-
-
-require_once CLASS_PATH.'/DbUtils.php';
-$dbUtils=new DbUtils();
-
-$dbUtils->setDbType("pgsql");
-
-try{
-    $conn=$dbUtils->dbConnect(DBHOST,DBUSER,DBPASS,DBNAME);
-}catch(Exception $e) {
-    $erStr="Unable connect to database";
-}
-
-?>
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-                
-        <title>DbUtilsPDO Example Script</title>
-        <style type="text/css">
-            body{
-                font-family:Sans, Verdana, Arial;
-                font-size: 13px;
-            }
-        </style>
-        <script type="text/javascript">
-            function gotoPage(){
-                window.location='./example.php';
-            }
-            function submitForm(){
-                document.getElementById('exampleform').submit();
-            }
-        </script>
-    </head>
-<body>
-
 <form id="exampleform" method="get" action="example.php">
     <div style="clear:both; height:10px;"></div>
     <div style="float:left; margin-left:10px; width:150px; text-align:right;">Last name: </div>
@@ -77,35 +17,17 @@ try{
     <div style="float:left; margin-left:10px; width:150px; text-align:right;">Email: </div>
     <div style="float:left; margin-left:10px; width:200px; text-align:left;"><input type="text" id="email" name="email" value="" /></div>
     <div style="clear:both; height:10px;"></div>
-
-    <div style="float:left; margin-left:170px; text-align:left;">
-		<button type="buttom" id="newuser" name="newuser" value="1" onclick="submitForm('exampleform')">Add User</button>
-	</div>
-    <div style="clear:both; height:10px;"></div>
-</form>
-<?php
-echo "<div>
-		<div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-=======
     <div style="float:left; margin-left:170px; text-align:left;"><button type="buttom" id="newuser" name="newuser" value="1" onclick="submitForm()">Add User</button></div>
     <div style="clear:both; height:10px;"></div>
 </form>
 <?php
-echo "</div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-
+echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
 if(trim($erStr)==""){
     $sqlStr="select id, lname, fname, email from ".$tablename." where id=5";
     $row=$dbUtils->retSqlRow($conn, $sqlStr);
     if(count($row)!=0){
-        echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'];
-
-        if(!is_null($row['email'])) echo " | Email: ".$row['email'];
-        echo "</div>";
+        echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'].(!is_null($row['email'])?" | Email: ".$row['email']:"")."</div>";
         echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-
-            if(!is_null($row['email'])) echo " | Email: ".$row['email'];
-            echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-
     }
     
     $min=0;
@@ -144,11 +66,7 @@ if(trim($erStr)==""){
         $id=$dbUtils->retNextval($conn, 'users_id_seq');
         $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->parsStrNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
         $dbUtils->execSqlInsert($conn, $sqlStr);
-
-        echo "<script type=\"text/javascript\">    gotoPage('./example.php'); </script>";
-
         echo "<script type=\"text/javascript\">    gotoPage(); </script>";
-
         
     }elseif(trim($erStr)=="" && isset($_REQUEST['updateuser']) && $_REQUEST['updateuser']==1){
         $id=$_REQUEST['id'];
@@ -160,11 +78,7 @@ if(trim($erStr)==""){
         " where id=".$id;
         
         $dbUtils->execSqlUpdate($conn, $sqlStr);
-
-        echo "<script type=\"text/javascript\"> gotoPage('./example.php'); </script>";
-
         echo "<script type=\"text/javascript\"> gotoPage(); </script>";
-
     }
 }
 
@@ -175,13 +89,3 @@ if(trim($erStr)!==""){
 ?>   
 </div> 
 <?php require_once 'footer.php'; ?>
-=======
-
-
-
-
-
-?>   
-</body>
-</html> 
-
