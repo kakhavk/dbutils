@@ -4,11 +4,6 @@
 header('Content-Type: text/html; charset=utf-8');
 ini_set("display_errors", 1);
 
-define("DBHOST",'localhost');
-define("DBNAME",'test');
-define("DBUSER",'testuser');
-define("DBPASS",'test123');
-
 $rows=array();
 $rowsCount=0;
 $sqlStr="";
@@ -20,7 +15,7 @@ $min=0;
 $max=100;
 
 
-require_once "DbUtilsPDO.php";
+require_once "DbUtils.php";
 $dbUtils=new DbUtils();
 
 $dbUtils->setDbType("pgsql");
