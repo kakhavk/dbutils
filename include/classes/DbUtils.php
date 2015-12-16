@@ -30,6 +30,7 @@ class DbUtils {
     function databaseConnectionAttributes($conn, $attributeName=""){
 		$returnStr="";
 		
+
 		$pdoAttributes=array(
 			//"Autocommit"=>'AUTOCOMMIT',
 			"Case"=>"CASE", 
@@ -53,7 +54,6 @@ class DbUtils {
 					$returnStr.="<br /><br /><span style=\"color:navy;\">".$k."</span><br />".$conn->getAttribute(constant("PDO::ATTR_$v"));
 			}
 		}
-
 		return $returnStr;
 	}
     
@@ -70,7 +70,9 @@ class DbUtils {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,        		
         );
         
-        if(!isset($con)){
+
+        if(!isset($con)){            
+
             $dsn = $dbType.':host='.$host.';dbname='.$dbname;
             if($dbType=='oracle' || $dbType=='oci' || $dbType=='oci8') $dsn = 'OCI:dbname='.$dbname.';charset=UTF-8';
             $con=new PDO($dsn, $user, $pass, $options);
