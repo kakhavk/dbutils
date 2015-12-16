@@ -5,9 +5,7 @@ header('Content-Type: text/html; charset=utf-8');
 ini_set("display_errors", 1);
 
 require_once '../conf/params.php';
-define('INCLUDES_PATH', '../include');
-define('CLASS_PATH', INCLUDES_PATH.'/classes');
-
+require_once 'conf.php';
 
 $rows=array();
 $rowsCount=0;
@@ -20,7 +18,7 @@ $min=0;
 $max=100;
 
 
-require_once "DbUtils.php";
+require_once CLASS_PATH.'/DbUtils.php';
 $dbUtils=new DbUtils();
 
 $dbUtils->setDbType("pgsql");
