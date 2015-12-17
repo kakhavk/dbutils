@@ -64,7 +64,7 @@ if(trim($errorMessage)==""){
     
     if(trim($errorMessage)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
         $id=$dbUtils->retNextval($conn, 'users_id_seq');
-        $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->parsStrNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
+        $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->strNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
         $dbUtils->execSqlInsert($conn, $sqlStr);
         echo "<script type=\"text/javascript\">    gotoPage(); </script>";
         
@@ -73,7 +73,7 @@ if(trim($errorMessage)==""){
         $sqlStr="update ".$tablename." set".
         " lname='".$lname."'".
         ", fname='".$fname."'".
-        ", email=".$dbUtils->parsStrNull($email).
+        ", email=".$dbUtils->strNull($email).
         ", active=".$dbUtils->retBooleanCondition($active).
         " where id=".$id;
         

@@ -271,7 +271,7 @@ class DbUtils {
     /* Returns string or null
      * Since 0.3
      */
-	function parsStrNull($str){
+	function strNull($str){
 		if(!is_null($str) && $str!==""){
 			if (!get_magic_quotes_gpc()) {
 				$str=addslashes($str);
@@ -284,7 +284,7 @@ class DbUtils {
     /* Returns integer or null
      * Since 0.3
      */
-	function parsIntNull($digit){
+	function intNull($digit){
 		if(!is_null($digit) && trim($digit)!=="" && intval($digit)!=0) return $digit;
 		return "NULL";
 	}   
@@ -292,7 +292,7 @@ class DbUtils {
     /* Returns double or null
      * Since 0.3
      */
-	function parsDoubleNull($digit){
+	function doubleNull($digit){
 		if(!is_null($digit) && trim($digit)!=="" && doubleval($digit)!=0.00) return $digit;
 		return "NULL";
 	}
