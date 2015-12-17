@@ -5,6 +5,6 @@ ob_start();
 require_once '../README.md';
 $hi=nl2br(ob_get_contents());
 ob_end_clean();
-echo $hi;
+echo '<div id="content">'.$hi.'</div>';
 require_once 'footer.php';
 ?>

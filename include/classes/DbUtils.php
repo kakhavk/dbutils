@@ -6,11 +6,11 @@
 
 class DbUtils {
 
-    private $hiDbType; /* mysql, pgsql */
+    private $dbType; /* mysql, pgsql */
     public $erStr=null; //variable for error messages
 
     function __construct() {
-        $this->hiDbType="";
+        $this->dbType="";
     }
     
     /* Sets Database Type: mysql or pgsql */
@@ -19,12 +19,12 @@ class DbUtils {
         if($dbtype=='mysqli') $dbtype='mysql';
         if($dbtype=='postgresql') $dbtype='pgsql';
         
-        $this->hiDbType=$dbtype;
+        $this->dbType=$dbtype;
     }
     
     /* Returns Database Type: mysql or pgsql */
     function retDbType(){
-        return $this->hiDbType;
+        return $this->dbType;
     }
     
     function databaseConnectionAttributes($conn, $attributeName=""){
@@ -71,8 +71,7 @@ class DbUtils {
         );
         
 
-        if(!isset($con)){            
-
+        if(!isset($con)){
             $dsn = $dbType.':host='.$host.';dbname='.$dbname;
             if($dbType=='oracle' || $dbType=='oci' || $dbType=='oci8') $dsn = 'OCI:dbname='.$dbname.';charset=UTF-8';
             $con=new PDO($dsn, $user, $pass, $options);
@@ -96,7 +95,7 @@ class DbUtils {
      * For example: select count(id) from tablename
      * Since 0.3
      */
-    function retNumber($conn, $sqlStr) {        
+    function retNumber($conn, $sqlStr) {
         $ret=0;
         $retrow=array();
         $retrow=$conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
@@ -171,6 +170,7 @@ class DbUtils {
         return $stmt;
         
     }
+    
     /* Executes query for insert and if database type is mysql returns last inserted id */
     function execSqlInsert($conn, $sqlStr) {
         $ret=$this->execSqlUpdate($conn, $sqlStr);
@@ -214,17 +214,17 @@ class DbUtils {
     }
     
     /* Start transaction */
-    function hidbBeginTransaction($conn) {
+    function beginTransaction($conn) {
         $conn->beginTransaction();
     }
     
     /* Rollback transaction */
-    function hidbRollback($conn) {
+    function rollback($conn) {
         $conn->rollBack();
     }
     
     /* Commit transaction */
-    function hidbCommit($conn) {
+    function commit($conn) {
         $conn->commit();
     }
 
