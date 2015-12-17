@@ -1,6 +1,6 @@
 <?php
 # Database PDO utilities for MySQL and PostgreSQL
-# Version 0.7
+# Version 0.8
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
 
