@@ -1,7 +1,7 @@
 Database Utilities
 ==============================================
 
-Access MySQL, PostgreSQL using PDO
+Access and Manage MySQL or PostgreSQL database using PHP Data Objects (PDO)
 
 ==============================================
 
