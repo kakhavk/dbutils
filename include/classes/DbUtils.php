@@ -1,13 +1,13 @@
 <?php
 # Database PDO utilities for MySQL and PostgreSQL
-# Version 0.6
+# Version 0.7
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
 
 class DbUtils {
 
     private $dbType; /* mysql, pgsql */
-    public $erStr=null; //variable for error messages
+    public $errorMessage=null;
 
     function __construct() {
         $this->dbType="";
@@ -77,7 +77,7 @@ class DbUtils {
             $con=new PDO($dsn, $user, $pass, $options);
             
             if(!$con) {
-                $this->erStr.="Problem conbnecting to database ";
+                $this->errorMessage.="Problem conbnecting to database ";
                 return false;
             }
             
@@ -130,7 +130,7 @@ class DbUtils {
                 return $rows;
             }
         }catch(PDOException $exception){
-            $this->erStr="Error: code:".$exception->getCode().", info:".$exception->getMessage();
+            $this->errorMessage="Error: code:".$exception->getCode().", info:".$exception->getMessage();
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
 
@@ -154,7 +154,7 @@ class DbUtils {
                 return $row;
             }
         }catch(PDOException $exception){
-            $this->erStr="Error: code:".$exception->getCode().", info:".$exception->getMessage();
+            $this->errorMessage="Error: code:".$exception->getCode().", info:".$exception->getMessage();
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         return null;

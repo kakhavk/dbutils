@@ -5,7 +5,7 @@ $rows=array();
 $rowsCount=0;
 $sqlStr="";
 $i=0;
-$erStr="";
+$errorMessage="";
 
 $tablename="users";
 
@@ -24,7 +24,7 @@ else $dbUtils->setDbType("pgsql");
 try{
     $conn=$dbUtils->dbConnect(DBHOST, DBUSER, DBPASS, DBNAME);
 }catch(Exception $e) {
-    $erStr="Unable connect to database";
+    $errorMessage="Unable connect to database";
 }
 
 ?>

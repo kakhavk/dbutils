@@ -22,7 +22,7 @@ require_once 'header.php';
 </form>
 <?php
 echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-if(trim($erStr)==""){
+if(trim($errorMessage)==""){
     $sqlStr="select id, lname, fname, email from ".$tablename." where id=5";
     $row=$dbUtils->retSqlRow($conn, $sqlStr);
     if(count($row)!=0){
@@ -58,17 +58,17 @@ if(trim($erStr)==""){
         if(filter_var(trim($_REQUEST['email']), FILTER_VALIDATE_EMAIL)){
             $email=trim($_REQUEST['email']);
         }else{
-            $erStr="Email syntax for address: <span style=\"color:#0000FF;\">".trim($_REQUEST['email'])."</span> is not valid";
+            $errorMessage="Email syntax for address: <span style=\"color:#0000FF;\">".trim($_REQUEST['email'])."</span> is not valid";
         }
     }
     
-    if(trim($erStr)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
+    if(trim($errorMessage)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
         $id=$dbUtils->retNextval($conn, 'users_id_seq');
         $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->parsStrNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
         $dbUtils->execSqlInsert($conn, $sqlStr);
         echo "<script type=\"text/javascript\">    gotoPage(); </script>";
         
-    }elseif(trim($erStr)=="" && isset($_REQUEST['updateuser']) && $_REQUEST['updateuser']==1){
+    }elseif(trim($errorMessage)=="" && isset($_REQUEST['updateuser']) && $_REQUEST['updateuser']==1){
         $id=$_REQUEST['id'];
         $sqlStr="update ".$tablename." set".
         " lname='".$lname."'".
@@ -82,8 +82,8 @@ if(trim($erStr)==""){
     }
 }
 
-if(trim($erStr)!==""){
-    echo "<div style=\"margin-top:10px; color:red;\">Error: ".$erStr."</div>";
+if(trim($errorMessage)!==""){
+    echo "<div style=\"margin-top:10px; color:red;\">Error: ".$errorMessage."</div>";
 }
 
 ?>   
