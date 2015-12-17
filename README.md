@@ -1,7 +1,7 @@
 Database Utilities
 ==============================================
 
-This package can access MySQL, PostgreSQL using PDO
+Access MySQL, PostgreSQL using PDO
 
 ==============================================
 
