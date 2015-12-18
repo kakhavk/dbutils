@@ -22,7 +22,7 @@ if(isset($dbType)) $dbUtils->setDbType($dbType);
 else $dbUtils->setDbType("pgsql");
 
 try{
-    $conn=$dbUtils->dbConnect(DBHOST, DBUSER, DBPASS, DBNAME);
+    $conn=$dbUtils->connect(DBHOST, DBUSER, DBPASS, DBNAME);
 }catch(Exception $e) {
     $errorMessage="Unable connect to database";
 }

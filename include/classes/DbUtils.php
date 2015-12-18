@@ -26,8 +26,8 @@ class DbUtils {
         return $this->dbType;
     }
     
-    function databaseConnectionAttributes($conn, $attributeName=""){
-		$returnStr="";
+    function connectionAttributes($conn, $attributeName=""){
+		$attr="";
 		
 
 		$pdoAttributes=array(
@@ -46,21 +46,21 @@ class DbUtils {
 			);
 
 		if(isset($attributeName) && !is_null($attributeName) && trim($attributeName)!==""){
-			$returnStr=$conn->getAttribute(constant("PDO::ATTR_$attributeName"));
+			$attr=$conn->getAttribute(constant("PDO::ATTR_$attributeName"));
 		}else{
 			foreach($pdoAttributes as $k => $v){
 				if(null!==($conn->getAttribute(constant("PDO::ATTR_$v"))))
-					$returnStr.="<br /><br /><span style=\"color:navy;\">".$k."</span><br />".$conn->getAttribute(constant("PDO::ATTR_$v"));
+					$attr.='<div><span style="color:navy;">'.$k.'</span></div>'.$conn->getAttribute(constant('PDO::ATTR_'.$v));
 			}
 		}
-		return $returnStr;
+		return $attr;
 	}
     
     /* Create connection */
-    function dbConnect($host, $user, $pass, $dbname) {
+    function connect($host, $user, $pass, $dbname) {
         
         static $con;
-        $dbType=$this->retDbType();
+        $dbType=$this->getDbType();
         
         $options = array(
             PDO::ATTR_TIMEOUT => 30,
@@ -68,7 +68,6 @@ class DbUtils {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,        		
         );
-        
 
         if(!isset($con) || is_null($con)){			
 			try{
@@ -105,7 +104,7 @@ class DbUtils {
      * query must be full sql string
      */
     function fetchRows($conn, $sqlStr, $min=0, $max=0){
-        $dbType=$this->retDbType();
+        $dbType=$this->getDbType();
         $rs=null;
         $rows=array();
         
@@ -190,7 +189,7 @@ class DbUtils {
     /* Executes query for insert and if database type is mysql returns last inserted id */
     function insert($conn, $sqlStr) {
         $ret=$this->execSqlUpdate($conn, $sqlStr);
-        if($this->retDbType()=="mysql") return $conn->lastInsertId();
+        if($this->getDbType()=="mysql") return $conn->lastInsertId();
         return $ret;
     }    
     
@@ -210,7 +209,7 @@ class DbUtils {
     * Since 0.10
     */
     function nextVal($conn, $sequence){
-        $dbType=$this->retDbType();
+        $dbType=$this->getDbType();
         $seqId=0;
         $ret=array();
         $sqlStr="";
@@ -237,7 +236,7 @@ class DbUtils {
         $ret=array();
         $sqlStr="";
         
-        if($this->retDbType()=='mysql'){
+        if($this->getDbType()=='mysql'){
             $lastId=$conn->lastInsertId();
         }
         
@@ -275,7 +274,7 @@ class DbUtils {
     
     /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */    
     function limitStr($min, $max){
-    	$dbType=$this->retDbType();
+    	$dbType=$this->getDbType();
         $str=array();
         $str['mysql']=" limit ".$min.", ".$max;
         $str['pgsql']=" limit ".$max." offset ".$min;
@@ -294,9 +293,9 @@ class DbUtils {
      * insert into table (id, active) values (12, retBooleanCondition(1));
      * where active is boolean type field inserts in mysql 1 and postgresql true
      */
-    function retBooleanCondition($value){
+    function booleanCondition($value){
         $retStr="";
-        $dbType=$this->retDbType();
+        $dbType=$this->getDbType();
         $valueStr=trim($value);
         
         if($dbType=="mysql"){

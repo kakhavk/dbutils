@@ -24,16 +24,17 @@ require_once 'header.php';
 echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
 if(trim($errorMessage)==""){
     $sqlStr="select id, lname, fname, email from ".$tablename." where id=5";
-    $row=$dbUtils->retSqlRow($conn, $sqlStr);
+    $row=$dbUtils->fetchRow($conn, $sqlStr);
     if(count($row)!=0){
         echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'].(!is_null($row['email'])?" | Email: ".$row['email']:"")."</div>";
         echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
     }
-    
+
     $min=0;
     $max=20;
     $sqlStr="select id, lname, fname, email from ".$tablename." order by id desc";
-    $rows=$dbUtils->retSqlRows($conn, $sqlStr, $min, $max);
+    $rows=$dbUtils->fetchRows($conn, $sqlStr, $min, $max);
+    
     $rowsCount=count($rows);
     if($rowsCount!=0){
         for($i=0; $i<$rowsCount; $i++){
@@ -63,9 +64,9 @@ if(trim($errorMessage)==""){
     }
     
     if(trim($errorMessage)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
-        $id=$dbUtils->retNextval($conn, 'users_id_seq');
-        $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->strNull($email).", ".$dbUtils->retBooleanCondition($active).")";  
-        $dbUtils->execSqlInsert($conn, $sqlStr);
+        $id=$dbUtils->nextval($conn, 'users_id_seq');
+        $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->strNull($email).", ".$dbUtils->booleanCondition($active).")";  
+        $dbUtils->insert($conn, $sqlStr);
         echo "<script type=\"text/javascript\">    gotoPage(); </script>";
         
     }elseif(trim($errorMessage)=="" && isset($_REQUEST['updateuser']) && $_REQUEST['updateuser']==1){
@@ -74,16 +75,16 @@ if(trim($errorMessage)==""){
         " lname='".$lname."'".
         ", fname='".$fname."'".
         ", email=".$dbUtils->strNull($email).
-        ", active=".$dbUtils->retBooleanCondition($active).
+        ", active=".$dbUtils->booleanCondition($active).
         " where id=".$id;
         
-        $dbUtils->execSqlUpdate($conn, $sqlStr);
+        $dbUtils->update($conn, $sqlStr);
         echo "<script type=\"text/javascript\"> gotoPage(); </script>";
     }
 }
 
 if(trim($errorMessage)!==""){
-    echo "<div style=\"margin-top:10px; color:red;\">Error: ".$errorMessage."</div>";
+    echo "<div style=\"margin-top:10px; color:red;\">".$errorMessage."</div>";
 }
 
 ?>   

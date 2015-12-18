@@ -8,8 +8,8 @@ require_once 'header.php';
 ?>
 <div id="content">
 <?php
-$databaseConnectionAttributes=$dbUtils->databaseConnectionAttributes($conn,'');
-echo $databaseConnectionAttributes;
+$connectionAttributes=$dbUtils->connectionAttributes($conn,'');
+echo $connectionAttributes;
 ?>
 </div>
 <?php require_once 'footer.php'; ?>
