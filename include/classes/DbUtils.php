@@ -2,6 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
+# Version 1.0
 
 class DbUtils {
 
@@ -130,14 +131,7 @@ class DbUtils {
 
         return null;	
     }
-    
-    /* this method is deprecated and will be removed 
-    * same as retNumber
-    * @Since 0.3          
-    */
-    function retSqlRows($conn, $sqlStr, $min=0, $max=0) {        
-		return $this->fetchRows($conn, $sqlStr, $min, $max);
-    }   
+     
     
     /* Fetch single sql record or null if error detected
      * query must be full sql string
@@ -160,15 +154,7 @@ class DbUtils {
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         return null;
-    } 
-    
-    /* same as fetchRow
-     * this method is deprecated and will be removed 
-     */
-    function retSqlRow($conn, $sqlStr) {
-		return $this->fetchRow($sqlStr);
     }
-    
         
     /* Executes query for "insert / update / delete methods" */
     function update($conn, $sqlStr){
@@ -179,13 +165,6 @@ class DbUtils {
         return $stmt;
     }
     
-    /* same as update
-     * this method is deprecated and will be removed 
-     */
-    function execSqlUpdate($conn, $sqlStr) {
-		return update($conn, $sqlStr);
-    }
-    
     /* Executes query for insert and if database type is mysql returns last inserted id */
     function insert($conn, $sqlStr) {
         $ret=$this->execSqlUpdate($conn, $sqlStr);
@@ -193,16 +172,8 @@ class DbUtils {
         return $ret;
     }    
     
-    /* this method is deprecated and will be removed 
-    * same as insert
-    */
-    
-    function execSqlInsert($conn, $sqlStr) {
-        return $this->insert($conn, $sqlStr);
-    }
-    
     /* Unset connection object */
-    function conClose(&$conn) {
+    function close(&$conn) {
         $conn=null;
     }
     /* get next sequence value 
@@ -223,13 +194,6 @@ class DbUtils {
         return $seqId;    
     }
     
-    /* this method is deprecated and will be removed 
-    * same as nextVal
-    */
-    function retNextval($conn, $nextvalStr) {
-		return $this->nextVal($conn, $nextvalStr);
-    }
-
     /* Returns last inserted id for mysql */
     function lastInsertedId($conn) {
         $lastId=0;
@@ -242,14 +206,7 @@ class DbUtils {
         
         return $lastId;
     }
-
-    /* this method is deprecated and will be removed 
-    * same as nextVal
-    */
-    function retLastInsertedId($conn, $nextvalStr) {
-        return $this->lastInsertedId($conn);
-    }
-    
+   
     /* Start transaction */
     function beginTransaction($conn) {
         $conn->beginTransaction();
@@ -280,12 +237,6 @@ class DbUtils {
         $str['pgsql']=" limit ".$max." offset ".$min;
         
         return $str[$dbType];
-    }
-    /* this method is deprecated and will be removed 
-    * same as limitStr
-    */
-    function retLimitSqlStr($min, $max){
-		return limitStr($min, $max);
     }
     
     /* For mysql true and false is 0 and 1 for postgresql true and false so it will change by database type values
