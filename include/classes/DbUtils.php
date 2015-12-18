@@ -102,13 +102,10 @@ class DbUtils {
         return $ret;
     }
     
-     
-    /* Return sql records or null if error detected
+    /* Fetch sql records or null if error detected
      * query must be full sql string
-     * @Since 0.3
      */
-    function retSqlRows($conn, $sqlStr, $min=0, $max=0) {
-        
+    function fetchRows($conn, $sqlStr, $min=0, $max=0){
         $dbType=$this->retDbType();
         $rs=null;
         $rows=array();
@@ -133,14 +130,22 @@ class DbUtils {
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
 
-        return null;
-    }    
+        return null;	
+    }
     
-    /* Return one sql record or null if error detected
+    /* this method is deprecated and will be removed 
+    * same as retNumber
+    * @Since 0.3          
+    */
+    function retSqlRows($conn, $sqlStr, $min=0, $max=0) {        
+		return $this->fetchRows($conn, $sqlStr, $min, $max);
+    }   
+    
+    /* Fetch single sql record or null if error detected
      * query must be full sql string
      */
-    function retSqlRow($conn, $sqlStr) {
-        
+    function fetchRow($conn, $sqlStr){
+
         $rs=null;
         $row=array();
         
@@ -157,59 +162,94 @@ class DbUtils {
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         return null;
+    } 
+    
+    /* same as fetchRow
+     * this method is deprecated and will be removed 
+     */
+    function retSqlRow($conn, $sqlStr) {
+		return $this->fetchRow($sqlStr);
     }
     
-    /* Executes query for "insert / update / delete methods" */
-    function execSqlUpdate($conn, $sqlStr) {
         
+    /* Executes query for "insert / update / delete methods" */
+    function update($conn, $sqlStr){
         $stmt=null;
         $stmt=$conn->prepare($sqlStr);
 		$stmt->execute();
 		
         return $stmt;
-        
+    }
+    
+    /* same as update
+     * this method is deprecated and will be removed 
+     */
+    function execSqlUpdate($conn, $sqlStr) {
+		return update($conn, $sqlStr);
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    function execSqlInsert($conn, $sqlStr) {
+    function insert($conn, $sqlStr) {
         $ret=$this->execSqlUpdate($conn, $sqlStr);
         if($this->retDbType()=="mysql") return $conn->lastInsertId();
         return $ret;
+    }    
+    
+    /* this method is deprecated and will be removed 
+    * same as insert
+    */
+    
+    function execSqlInsert($conn, $sqlStr) {
+        return $this->insert($conn, $sqlStr);
     }
     
     /* Unset connection object */
     function conClose(&$conn) {
         $conn=null;
     }
-    
-    /* Returns next sequence for postgresql 
-     */
-    function retNextval($conn, $nextvalStr) {
+    /* get next sequence value 
+    * Since 0.10
+    */
+    function nextVal($conn, $sequence){
         $dbType=$this->retDbType();
         $seqId=0;
         $ret=array();
         $sqlStr="";
         
         if($dbType=='pgsql'){
-            $sqlStr="SELECT nextval('".$nextvalStr."')"; 
+            $sqlStr="SELECT nextval('".$sequence."')"; 
             $ret=$conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId=$ret[0];
         }
         
-        return $seqId;
+        return $seqId;    
+    }
+    
+    /* this method is deprecated and will be removed 
+    * same as nextVal
+    */
+    function retNextval($conn, $nextvalStr) {
+		return $this->nextVal($conn, $nextvalStr);
     }
 
     /* Returns last inserted id for mysql */
-    function retLastInsertedId($conn, $nextvalStr) {
-        $seqId=0;
+    function lastInsertedId($conn) {
+        $lastId=0;
         $ret=array();
         $sqlStr="";
         
         if($this->retDbType()=='mysql'){
-            $seqId=$conn->lastInsertId();
+            $lastId=$conn->lastInsertId();
         }
         
-        return $seqId;
+        return $lastId;
+    }
+
+    /* this method is deprecated and will be removed 
+    * same as nextVal
+    */
+    function retLastInsertedId($conn, $nextvalStr) {
+        return $this->lastInsertedId($conn);
     }
     
     /* Start transaction */
@@ -234,14 +274,20 @@ class DbUtils {
         return false;
     }
     
-    /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */
-    function retLimitSqlStr($min, $max){
+    /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */    
+    function limitStr($min, $max){
     	$dbType=$this->retDbType();
-        $retStr=array();
-        $retStr['mysql']=" limit ".$min.", ".$max;
-        $retStr['pgsql']=" limit ".$max." offset ".$min;
+        $str=array();
+        $str['mysql']=" limit ".$min.", ".$max;
+        $str['pgsql']=" limit ".$max." offset ".$min;
         
-        return $retStr[$dbType];
+        return $str[$dbType];
+    }
+    /* this method is deprecated and will be removed 
+    * same as limitStr
+    */
+    function retLimitSqlStr($min, $max){
+		return limitStr($min, $max);
     }
     
     /* For mysql true and false is 0 and 1 for postgresql true and false so it will change by database type values
@@ -268,7 +314,7 @@ class DbUtils {
     }
     
     /* Returns string or null
-     * Since 0.3
+     * Since 0.10
      */
 	function strNull($str){
 		if(!is_null($str) && $str!==""){
@@ -281,7 +327,7 @@ class DbUtils {
 	}
     
     /* Returns integer or null
-     * Since 0.3
+     * Since 0.10
      */
 	function intNull($digit){
 		if(!is_null($digit) && trim($digit)!=="" && intval($digit)!=0) return $digit;
@@ -289,7 +335,7 @@ class DbUtils {
 	}   
     
     /* Returns double or null
-     * Since 0.3
+     * Since 0.10
      */
 	function doubleNull($digit){
 		if(!is_null($digit) && trim($digit)!=="" && doubleval($digit)!=0.00) return $digit;
