@@ -22,7 +22,7 @@ class DbUtils {
     }
     
     /* Returns Database Type: mysql or pgsql */
-    function retDbType(){
+    function getDbType(){
         return $this->dbType;
     }
     
@@ -92,14 +92,13 @@ class DbUtils {
     /* Return number value from sql like "COUNT, SUM" and other similar methods which returns one number value
      * query must be full sql string and must return one value. 
      * For example: select count(id) from tablename
-     * Since 0.3
      */
-    function retNumber($conn, $sqlStr) {
-        $ret=0;
-        $retrow=array();
-        $retrow=$conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
-        if(is_array($retrow) && count($retrow)!=0 && is_numeric($retrow[0])) $ret=$retrow[0];
-        return $ret;
+    function getNumber($conn, $sqlStr) {
+        $number=0;
+        $row=array();
+        $row=$conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
+        if(is_array($row) && count($row)!=0 && is_numeric($row[0])) $number=$row[0];
+        return $number;
     }
     
     /* Fetch sql records or null if error detected
