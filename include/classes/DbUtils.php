@@ -70,19 +70,19 @@ class DbUtils {
         );
         
 
-        if(!isset($con)){
-            $dsn = $dbType.':host='.$host.';dbname='.$dbname;
-            if($dbType=='oracle' || $dbType=='oci' || $dbType=='oci8') $dsn = 'OCI:dbname='.$dbname.';charset=UTF-8';
-            $con=new PDO($dsn, $user, $pass, $options);
+        if(!isset($con) || is_null($con)){			
+			try{
+				$dsn = $dbType.':host='.$host.';dbname='.$dbname;
+				if($dbType=='oracle' || $dbType=='oci' || $dbType=='oci8') $dsn = 'OCI:dbname='.$dbname.';charset=UTF-8';
+				$con=new PDO($dsn, $user, $pass, $options);
+				if($dbType=="mysql"){
+					$con->prepare("SET NAMES 'utf8'")->execute();
+				}
+            }catch(PDOException $e){
+				$this->errorMessage.="Problem connecting to database: ".$e.getMessage();
+				return false;
+            }            
             
-            if(!$con) {
-                $this->errorMessage.="Problem conbnecting to database ";
-                return false;
-            }
-            
-            if($dbType=="mysql"){
-                $con->prepare("SET NAMES 'utf8'")->execute();
-            }
         }
         
         return $con;
