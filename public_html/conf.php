@@ -12,7 +12,6 @@ define('DBHOST','host');
 define('DBUSER','username');
 define('DBPASS','password');
 define('DBNAME','databasename');
-
 */
 
 require_once '../conf/params.php';
