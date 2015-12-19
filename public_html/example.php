@@ -25,8 +25,8 @@ echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1
 if(trim($errorMessage)==""){
 	$fetchMode=PDO::FETCH_ASSOC;
 	
-    $sqlStr="select id, lname, fname, email from ".$tablename." where id=5";
-    $row=$dbUtils->fetchRow($conn, $sqlStr);//, null, $fetchMode);
+    $sqlStr="select id, lname, fname, email from ".$tablename." where id=:id";
+    $row=$dbUtils->fetchRow($conn, $sqlStr, array('name'=>id, 'value'=>1, 'dataType'=>PDO::PARAM_INT), $fetchMode);
     if(count($row)!=0){
         echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'].(!is_null($row['email'])?" | Email: ".$row['email']:"")."</div>";
         echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
@@ -38,7 +38,7 @@ if(trim($errorMessage)==""){
     $bindValues=array(
 			'fields'=>array(
 				array('name'=>':fname', 'value'=>'fname', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_LEFT),
-				array('name'=>':lname', 'value'=>'lname2', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_RIGHT)
+				array('name'=>':lname', 'value'=>'lname', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_ANY)
 				
 			),
 			'offset'=>array(

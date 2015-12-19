@@ -137,7 +137,6 @@ class DbUtils {
 		$stmt=$conn->prepare($sqlStr);
 		
 		if(is_array($bindValues['fields'])){
-
 			for($i=0; $i<count($bindValues['fields']); $i++){
 				$bindValue=$bindValues['fields'][$i]["value"];
 				
@@ -146,8 +145,7 @@ class DbUtils {
 				}
 				
 				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
-			}
-			
+			}			
 		}
 		if(is_array($bindValues['offset'])){
 			for($i=0; $i<count($bindValues['offset']); $i++){
@@ -173,17 +171,37 @@ class DbUtils {
     /* Fetch single sql record or null if error detected
      * query must be full sql string
      */
-    function fetchRow($conn, $sqlStr){
+    function fetchRow($conn, $sqlStr, $bindValues=array(), $fetch_mode=null){
 
-        $rs=null;
+        $stmt=null;
         $row=array();
         
-        $rs=$conn->prepare($sqlStr);
-        $rs->execute();
+        $bindValue=null;
+        $fetchMode=PDO::FETCH_ASSOC;
+        if(!is_null($fetch_mode)){
+			$fetchMode=$fetch_mode;
+        }        
+        
+        $stmt=$conn->prepare($sqlStr);
+		
+		if(is_array($bindValues['fields'])){
+			for($i=0; $i<count($bindValues['fields']); $i++){
+				$bindValue=$bindValues['fields'][$i]["value"];
+				
+				if(!is_null($bindValues['fields'][$i]['like'])){
+					$bindValue=$this->like($bindValue, $bindValues['fields'][$i]['like']);
+				}				
+				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
+			}			
+		}elseif(isset($bindValues['name'])){
+			$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);	
+		}
+        
+        $stmt->execute();
         
 		try{
-            if(false!==($row=$rs->fetch(PDO::FETCH_ASSOC))) {
-                unset($rs);            
+            if(false!==($row=$stmt->fetch(PDO::FETCH_ASSOC))) {
+                unset($stmt);            
                 return $row;
             }
         }catch(PDOException $exception){
