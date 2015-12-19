@@ -104,31 +104,59 @@ class DbUtils {
     /* Fetch sql records or null if error detected
      * query must be full sql string
      */
-    function fetchRows($conn, $sqlStr, $min=0, $max=0){
+    function fetchRows($conn, $sqlStr, $bindValues=array(), $fetch_mode=null){
         $dbType=$this->getDbType();
-        $rs=null;
+        $stmt=null;
         $rows=array();
-        
-	
-        if($max != 0) {
-            if($dbType=='mysql')
-                $sqlStr.=" limit ".$min.", ".$max;
-            elseif($dbType=='pgsql')
-                $sqlStr .=" limit ".$max." offset ".$min."";
+        $bindValue=null;
+        $fetchMode=PDO::FETCH_ASSOC;
+        if(!is_null($fetch_mode)){
+			$fetchMode=$fetch_mode;
         }
+         
+        if(is_array($bindValues['offset'])) {
+        
+            if($dbType=='mysql')
+                $sqlStr.=" limit :min, :max";
+            elseif($dbType=='pgsql')
+                $sqlStr .=" limit :max offset :min";
+        }
+		
+		
+		$stmt=$conn->prepare($sqlStr);
+		
+		if(is_array($bindValues['fields'])){
 
-		$rs=$conn->prepare($sqlStr);
-        $rs->execute();
+			for($i=0; $i<count($bindValues['fields']); $i++){
+				$bindValue=$bindValues['fields'][$i]["value"];
+				
+				if(!is_null($bindValues['fields'][$i]['like'])){
+					if($bindValues['fields'][$i]['like']=='left') $bindValue=$bindValues['fields'][$i]["value"].'%';
+					elseif($bindValues['fields'][$i]['like']=='right') $bindValue='%'.$bindValues['fields'][$i]["value"];
+					elseif($bindValues['fields'][$i]['like']=='any') $bindValue='%'.$bindValues['fields'][$i]["value"].'%';
+				}
+				
+				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
+			}
+			
+		}
+		if(is_array($bindValues['offset'])){
+			for($i=0; $i<count($bindValues['offset']); $i++){
+				$stmt->bindValue($bindValues['offset'][$i]['name'], $bindValues['offset'][$i]['value'], $bindValues['offset'][$i]['dataType']);				
+			}
+		}
+        $stmt->execute();
+        
         try{
-            if(false!==($rows=$rs->fetchAll(PDO::FETCH_ASSOC))) {
-                unset($rs);            
+            if(false!==($rows=$stmt->fetchAll($fetchMode))) {
+                unset($stmt);            
                 return $rows;
             }
         }catch(PDOException $exception){
             $this->errorMessage="Error: code:".$exception->getCode().", info:".$exception->getMessage();
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
-
+        
         return null;	
     }
      

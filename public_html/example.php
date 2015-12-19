@@ -23,8 +23,10 @@ require_once 'header.php';
 <?php
 echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
 if(trim($errorMessage)==""){
+	$fetchMode=PDO::FETCH_ASSOC;
+	
     $sqlStr="select id, lname, fname, email from ".$tablename." where id=5";
-    $row=$dbUtils->fetchRow($conn, $sqlStr);
+    $row=$dbUtils->fetchRow($conn, $sqlStr);//, null, $fetchMode);
     if(count($row)!=0){
         echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'].(!is_null($row['email'])?" | Email: ".$row['email']:"")."</div>";
         echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
@@ -32,8 +34,22 @@ if(trim($errorMessage)==""){
 
     $min=0;
     $max=20;
-    $sqlStr="select id, lname, fname, email from ".$tablename." order by id desc";
-    $rows=$dbUtils->fetchRows($conn, $sqlStr, $min, $max);
+
+    $bindValues=array(
+			'fields'=>array(
+			//array('name'=>':id', 'value'=>4, 'dataType'=>PDO::PARAM_INT),
+				array('name'=>':fname', 'value'=>'fname', 'dataType'=>PDO::PARAM_STR, 'like'=>'left'),
+				array('name'=>':lname', 'value'=>'lname', 'dataType'=>PDO::PARAM_STR, 'like'=>'any')
+				
+			),
+			'offset'=>array(
+				array('name'=>':min', 'value'=>0, 'dataType'=>PDO::PARAM_INT),
+				array('name'=>':max', 'value'=>3, 'dataType'=>PDO::PARAM_INT)
+			)
+		);
+    
+    $sqlStr="select id, lname, fname, email from ".$tablename." where fname like :fname and lname like :lname order by id desc";  //id!=:id
+    $rows=$dbUtils->fetchRows($conn, $sqlStr, $bindValues, $fetchMode);
     
     $rowsCount=count($rows);
     if($rowsCount!=0){
