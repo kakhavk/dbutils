@@ -7,6 +7,7 @@ $title="Test";
 require_once 'header.php';
 ?>
 <div id="content">
+<br />
 <?php
 $connectionAttributes=$dbUtils->connectionAttributes($conn,'');
 echo $connectionAttributes;

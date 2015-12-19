@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.0
+# Version 1.x
 
 class DbUtils {
 
@@ -25,6 +25,17 @@ class DbUtils {
     /* Returns Database Type: mysql or pgsql */
     function getDbType(){
         return $this->dbType;
+    }
+    
+    /* parse like condition is query */
+    function like($value, $likeIndex){
+		$str=null;
+		if(!is_null($likeIndex) && $likeIndex!=0){
+			if($likeIndex==1) $str='%'.$value.'%'; // like is any
+			elseif($likeIndex==2) $str=$value.'%'; // like is left
+			elseif($likeIndex==3) $str='%'.$value; // like is right
+		}
+		return $str;
     }
     
     function connectionAttributes($conn, $attributeName=""){
@@ -51,7 +62,7 @@ class DbUtils {
 		}else{
 			foreach($pdoAttributes as $k => $v){
 				if(null!==($conn->getAttribute(constant("PDO::ATTR_$v"))))
-					$attr.='<div><span style="color:navy;">'.$k.'</span></div>'.$conn->getAttribute(constant('PDO::ATTR_'.$v));
+					$attr.='<div><span style="color:navy;">'.$k.'</span>:'.$conn->getAttribute(constant('PDO::ATTR_'.$v)).'</div>';
 			}
 		}
 		return $attr;
@@ -131,9 +142,7 @@ class DbUtils {
 				$bindValue=$bindValues['fields'][$i]["value"];
 				
 				if(!is_null($bindValues['fields'][$i]['like'])){
-					if($bindValues['fields'][$i]['like']=='left') $bindValue=$bindValues['fields'][$i]["value"].'%';
-					elseif($bindValues['fields'][$i]['like']=='right') $bindValue='%'.$bindValues['fields'][$i]["value"];
-					elseif($bindValues['fields'][$i]['like']=='any') $bindValue='%'.$bindValues['fields'][$i]["value"].'%';
+					$bindValue=$this->like($bindValue, $bindValues['fields'][$i]['like']);
 				}
 				
 				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				

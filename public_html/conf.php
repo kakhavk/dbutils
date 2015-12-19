@@ -3,6 +3,10 @@
 ini_set("display_errors", 'On');
 ini_set("error_reporting", "E_ALL");
 
+define('LIKE_ANY',1);
+define('LIKE_LEFT',2);
+define('LIKE_RIGHT',3);
+
 
 /*
 if does not exists file ../conf/params.php

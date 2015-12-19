@@ -37,9 +37,8 @@ if(trim($errorMessage)==""){
 
     $bindValues=array(
 			'fields'=>array(
-			//array('name'=>':id', 'value'=>4, 'dataType'=>PDO::PARAM_INT),
-				array('name'=>':fname', 'value'=>'fname', 'dataType'=>PDO::PARAM_STR, 'like'=>'left'),
-				array('name'=>':lname', 'value'=>'lname', 'dataType'=>PDO::PARAM_STR, 'like'=>'any')
+				array('name'=>':fname', 'value'=>'fname', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_LEFT),
+				array('name'=>':lname', 'value'=>'lname2', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_RIGHT)
 				
 			),
 			'offset'=>array(
