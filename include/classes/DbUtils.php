@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.x
+# Version 1.1
 
 class DbUtils {
 
@@ -222,7 +222,7 @@ class DbUtils {
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
     function insert($conn, $sqlStr) {
-        $ret=$this->execSqlUpdate($conn, $sqlStr);
+        $ret=$this->update($conn, $sqlStr);
         if($this->getDbType()=="mysql") return $conn->lastInsertId();
         return $ret;
     }    
@@ -253,7 +253,7 @@ class DbUtils {
     function lastInsertedId($conn) {
         $lastId=0;
         $ret=array();
-        $sqlStr="";
+        $sqlStr='';
         
         if($this->getDbType()=='mysql'){
             $lastId=$conn->lastInsertId();

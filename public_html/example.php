@@ -2,105 +2,120 @@
 # Example for class DbUtils
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 
-$title="DbUtilsPDO Example Script";
+$title="Example Script";
 require_once 'header.php';
+
+$id=0;
+$lname=null;
+$fname=null;
+$min=0;
+$max=20;
+$fetchMode=PDO::FETCH_ASSOC;
+
+$action=null;
+if(isset($_REQUEST['action']) && trim($_REQUEST['action'])!=="") $action=trim($_REQUEST['action']);
+
+if(isset($_REQUEST['lname']) && trim($_REQUEST['lname'])!=="") $lname=trim($_REQUEST['lname']); 
+if(isset($_REQUEST['fname']) && trim($_REQUEST['fname'])!=="") $fname=trim($_REQUEST['fname']);
+if(isset($_REQUEST['email']) && trim($_REQUEST['email'])!=="") $email=trim($_REQUEST['email']);
+
 ?>
+<style>
+ .fieldlabel{
+	float:left; margin-left:10px; width:150px; text-align:right;
+ }
+ .fieldinput{
+	float:left; margin-left:10px; width:200px; text-align:left;
+ }
+</style>
 <div id="content">
 <form id="exampleform" method="get" action="example.php">
+	<input type="hidden" id="action" name="action" value="update" />
+    <div style="clear:both; height:10px;"></div>    
+    <div class="fieldlabel">Last name: </div>
+    <div class="fieldinput"><input type="text" id="lname" name="lname" value="<?php if(!is_null($lname)) echo $lname; ?>" /></div>
     <div style="clear:both; height:10px;"></div>
-    <div style="float:left; margin-left:10px; width:150px; text-align:right;">Last name: </div>
-    <div style="float:left; margin-left:10px; width:200px; text-align:left;"><input type="text" id="lname" name="lname" value="" /></div>
+    <div class="fieldlabel">First name: </div>
+    <div class="fieldinput"><input type="text" id="fname" name="fname" value="<?php if(!is_null($fname)) echo $fname; ?>" /></div>
     <div style="clear:both; height:10px;"></div>
-    <div style="float:left; margin-left:10px; width:150px; text-align:right;">First name: </div>
-    <div style="float:left; margin-left:10px; width:200px; text-align:left;"><input type="text" id="fname" name="fname" value="" /></div>
+    <div class="fieldlabel">Email: </div>
+    <div class="fieldinput"><input type="text" id="email" name="email" value="<?php if(!is_null($email)) echo $email; ?>" /></div>
     <div style="clear:both; height:10px;"></div>
-    <div style="float:left; margin-left:10px; width:150px; text-align:right;">Email: </div>
-    <div style="float:left; margin-left:10px; width:200px; text-align:left;"><input type="text" id="email" name="email" value="" /></div>
-    <div style="clear:both; height:10px;"></div>
-    <div style="float:left; margin-left:170px; text-align:left;"><button type="buttom" id="newuser" name="newuser" value="1" onclick="submitForm()">Add User</button></div>
+    <div style="float:left; margin-left:170px; text-align:left;">
+		<button type="buttom" id="submit" name="submit" value="1" onclick="submitForm()">Add User</button>
+	</div>
     <div style="clear:both; height:10px;"></div>
 </form>
 <?php
-echo "<div><div style=\"clear:both; margin-top:5px; margin-bottom:10px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-if(trim($errorMessage)==""){
-	$fetchMode=PDO::FETCH_ASSOC;
+echo '<div style="margin-top:10px; height:1px; width:500px; background-color:#CCCCCC;"></div>';
+$errorMessage=trim($errorMessage);
+
+
+
+if($errorMessage=='' && !is_null($action) && $action=='update'){	
 	
-    $sqlStr="select id, lname, fname, email from ".$tablename." where id=:id";
-    $row=$dbUtils->fetchRow($conn, $sqlStr, array('name'=>id, 'value'=>1, 'dataType'=>PDO::PARAM_INT), $fetchMode);
-    if(count($row)!=0){
-        echo "<div style=\"color:green;\">ID:".$row['id']." | Name: ".$row['lname']." ".$row['fname'].(!is_null($row['email'])?" | Email: ".$row['email']:"")."</div>";
-        echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-    }
-
-    $min=0;
-    $max=20;
-
-    $bindValues=array(
-			'fields'=>array(
-				array('name'=>':fname', 'value'=>'fname', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_LEFT),
-				array('name'=>':lname', 'value'=>'lname', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_ANY)
-				
-			),
-			'offset'=>array(
-				array('name'=>':min', 'value'=>0, 'dataType'=>PDO::PARAM_INT),
-				array('name'=>':max', 'value'=>3, 'dataType'=>PDO::PARAM_INT)
-			)
-		);
-    
-    $sqlStr="select id, lname, fname, email from ".$tablename." where fname like :fname and lname like :lname order by id desc";  //id!=:id
-    $rows=$dbUtils->fetchRows($conn, $sqlStr, $bindValues, $fetchMode);
-    
-    $rowsCount=count($rows);
-    if($rowsCount!=0){
-        for($i=0; $i<$rowsCount; $i++){
-            echo "<div>ID:".$rows[$i]['id']." | Name: ".$rows[$i]['lname']." ".$rows[$i]['fname'];
-            if(!is_null($rows[$i]['email'])) echo " | Email: ".$rows[$i]['email'];
-            echo "</div><div style=\"clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;\"></div>";
-        }
+	if(is_null($lname)) $errorMessage.='Last name field is empty<br />';
+	if(is_null($fname)) $errorMessage.='First name field is empty<br />';
+	if(is_null($email)) $errorMessage.='Email field is empty<br />';
+	elseif(filter_var($email, FILTER_VALIDATE_EMAIL)==false) $errorMessage.='Email '.trim($_REQUEST['email']).' is not valid';
+    if($errorMessage==''){
+		if($id==0){
+			$id=$dbUtils->nextval($conn, 'users_id_seq');        
+			$sqlStr='insert into '.$tablename.' (id, lname, fname, email, active) values ('.$id.', '.$dbUtils->strNull($lname).', '.$dbUtils->strNull($fname).', '.$dbUtils->strNull($email).', '.$dbUtils->booleanCondition($active).')';  
+			$dbUtils->insert($conn, $sqlStr);
+			echo '<script type="text/javascript"> gotoPage("./example.php"); </script>';
+			
+		}else{
+			$id=$_REQUEST['id'];
+			$sqlStr='update '.$tablename.' set'.
+			' lname='.$dbUtils->strNull($lname).
+			', fname='.$dbUtils->strNull($fname).
+			', email='.$dbUtils->strNull($email).
+			', active='.$dbUtils->booleanCondition($active).
+			' where id='.$id;
+			
+			$dbUtils->update($conn, $sqlStr);
+			echo '<script type="text/javascript"> gotoPage("./example.php"); </script>';
+		}    
     }
     
-    $id=0;
-    $lname="Gabadadze 1";
-    $fname="Ushangi 1";
-    
-    if(isset($_REQUEST['lname']) && trim($_REQUEST['lname'])!==""){
-        $lname=trim($_REQUEST['lname']);
-    }
-    if(isset($_REQUEST['fname']) && trim($_REQUEST['fname'])!==""){
-        $fname=trim($_REQUEST['fname']);
-    }
-    if(isset($_REQUEST['email']) && trim($_REQUEST['email'])!==""){
-        
-        if(filter_var(trim($_REQUEST['email']), FILTER_VALIDATE_EMAIL)){
-            $email=trim($_REQUEST['email']);
-        }else{
-            $errorMessage="Email syntax for address: <span style=\"color:#0000FF;\">".trim($_REQUEST['email'])."</span> is not valid";
-        }
-    }
-    
-    if(trim($errorMessage)=="" && isset($_REQUEST['newuser']) && $_REQUEST['newuser']==1){
-        $id=$dbUtils->nextval($conn, 'users_id_seq');
-        $sqlStr="insert into ".$tablename." (id, lname, fname, email, active) values (".$id.", '".$lname."', '".$fname."', ".$dbUtils->strNull($email).", ".$dbUtils->booleanCondition($active).")";  
-        $dbUtils->insert($conn, $sqlStr);
-        echo "<script type=\"text/javascript\">    gotoPage(); </script>";
-        
-    }elseif(trim($errorMessage)=="" && isset($_REQUEST['updateuser']) && $_REQUEST['updateuser']==1){
-        $id=$_REQUEST['id'];
-        $sqlStr="update ".$tablename." set".
-        " lname='".$lname."'".
-        ", fname='".$fname."'".
-        ", email=".$dbUtils->strNull($email).
-        ", active=".$dbUtils->booleanCondition($active).
-        " where id=".$id;
-        
-        $dbUtils->update($conn, $sqlStr);
-        echo "<script type=\"text/javascript\"> gotoPage(); </script>";
-    }
+    if($errorMessage!==''){
+		echo '<div style="margin-top:10px; color:red;">'.$errorMessage.'</div>';
+	}
 }
 
-if(trim($errorMessage)!==""){
-    echo "<div style=\"margin-top:10px; color:red;\">".$errorMessage."</div>";
+$sqlStr="select id, lname, fname, email from ".$tablename." where id=:id";
+$row=$dbUtils->fetchRow($conn, $sqlStr, array('name'=>id, 'value'=>1, 'dataType'=>PDO::PARAM_INT), $fetchMode);
+if(count($row)!=0){
+	echo '<div style="color:green;">ID:'.$row['id'].' | Name: '.$row['lname'].' '.$row['fname'].(!is_null($row['email'])?' | Email: '.$row['email']:'').'</div>';
+	echo '<div style="clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;"></div>';
 }
+
+$bindValues=array(
+		'fields'=>array(				
+			array('name'=>':lname', 'value'=>'n', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_ANY)
+			
+		),
+		'offset'=>array(
+			array('name'=>':min', 'value'=>0, 'dataType'=>PDO::PARAM_INT),
+			array('name'=>':max', 'value'=>7, 'dataType'=>PDO::PARAM_INT)
+		)
+	);
+
+$sqlStr="select id, lname, fname, email from ".$tablename." where lname like :lname order by id desc";
+$rows=$dbUtils->fetchRows($conn, $sqlStr, $bindValues, $fetchMode);
+
+$rowsCount=count($rows);
+if($rowsCount!=0){
+	for($i=0; $i<$rowsCount; $i++){
+		echo '<div>ID:'.$rows[$i]['id'].' | Name: '.$rows[$i]['lname'].' '.$rows[$i]['fname'];
+		if(!is_null($rows[$i]['email'])) echo ' | Email: '.$rows[$i]['email'];
+		echo '</div>';
+		echo '<div style="clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;"></div>';
+	}
+}
+
+
 
 ?>   
 </div> 
