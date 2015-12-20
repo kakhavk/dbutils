@@ -8,23 +8,23 @@ class DbUtils {
 
     protected $dbType; /* mysql, pgsql */
     protected $attrEmulatePrepares; /* needed for supporting multiple queries */
-    protected $errorMessage=null; 
-    protected $isError=0; 
+    protected $errorMessage=null;
+    protected $isError=0;
 
     public function __construct() {
         $this->setDbType('pgsql');
         $this->setAttrEmulatePrepares(0);
     }
-    
+
     /* Sets Database Type: mysql or pgsql */
     public function setDbType($dbType){
         $dbtype=strtolower(trim($dbType));
         if($dbtype=='mysqli') $dbtype='mysql';
         if($dbtype=='postgresql') $dbtype='pgsql';
-        
+
         $this->dbType=$dbtype;
     }
-    
+
     /* Returns Database Type: mysql or pgsql */
     public function getDbType(){
         return $this->dbType;
@@ -45,17 +45,17 @@ class DbUtils {
     public function getErrorMessage(){
 		return $this->errorMessage;
     }
-    
+
     /* Set error state */
     public function setIsError($error){
 		$this->isError=$error;
     }
-    
-    /* Get error state */    
+
+    /* Get error state */
     public function getIsError(){
 		return $this->isError;
     }
-    
+
     /* parse like condition is query */
     public function like($value, $likeIndex){
 		$str=null;
@@ -66,19 +66,19 @@ class DbUtils {
 		}
 		return $str;
     }
-    
+
     public function connectionAttributes($conn, $attributeName=""){
 		$attr="";
-		
+
 
 		$pdoAttributes=array(
 			//"Autocommit"=>'AUTOCOMMIT',
-			"Case"=>"CASE", 
+			"Case"=>"CASE",
 			"Client Version"=>"CLIENT_VERSION",
 			"Connection Status"=>"CONNECTION_STATUS",
 			"Driver Name"=>"DRIVER_NAME",
 			"Error Mode"=>"ERRMODE",
-			"ORACLE Nulls"=>"ORACLE_NULLS", 
+			"ORACLE Nulls"=>"ORACLE_NULLS",
 			"Persistent"=>"PERSISTENT",
 			//"Prefetch"=>"PREFETCH",
 			"Server info"=>"SERVER_INFO",
@@ -96,13 +96,13 @@ class DbUtils {
 		}
 		return $attr;
 	}
-    
+
     /* Create connection */
     public function connect($host, $user, $pass, $dbname) {
-        
+
         static $con;
         $dbType=$this->getDbType();
-        
+
         $options = array(
             PDO::ATTR_TIMEOUT => 30,
             PDO::ATTR_PERSISTENT => true,
@@ -111,7 +111,7 @@ class DbUtils {
             PDO::ATTR_EMULATE_PREPARES=>1
         );
 
-        if(!isset($con) || is_null($con)){			
+        if(!isset($con) || is_null($con)){
 			try{
 				$dsn = $dbType.':host='.$host.';dbname='.$dbname;
 				if($dbType=='oracle' || $dbType=='oci' || $dbType=='oci8') $dsn = 'OCI:dbname='.$dbname.';charset=UTF-8';
@@ -122,16 +122,16 @@ class DbUtils {
             }catch(PDOException $e){
 				$this->errorMessage.="Problem connecting to database: ".$e.getMessage();
 				return false;
-            }            
-            
+            }
+
         }
-        
+
         return $con;
     }
 
-     
+
     /* Return number value from sql like "COUNT, SUM" and other similar methods which returns one number value
-     * query must be full sql string and must return one value. 
+     * query must be full sql string and must return one value.
      * For example: select count(id) from tablename
      */
     public function getNumber($conn, $sqlStr, $bindValues=array()) {
@@ -139,25 +139,25 @@ class DbUtils {
         $row=array();
         $stmt=null;
         $bindValue=null;
-        
+
         $fetchMode=PDO::FETCH_ASSOC;
         if(!is_null($fetch_mode)){
 			$fetchMode=$fetch_mode;
-        }  
-        
+        }
+
         $stmt=$conn->prepare($sqlStr);
         if(!is_null($bindValues)){
 			if(is_array($bindValues['fields'])){
 				for($i=0; $i<count($bindValues['fields']); $i++){
 					$bindValue=$bindValues['fields'][$i]["value"];
-					
+
 					if(!is_null($bindValues['fields'][$i]['like'])){
 						$bindValue=$this->like($bindValue, $bindValues['fields'][$i]['like']);
-					}				
-					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
-				}			
+					}
+					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+				}
 			}elseif(isset($bindValues['name'])){
-				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);	
+				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
 			}
 		}
         $stmt->execute();
@@ -170,10 +170,10 @@ class DbUtils {
         }catch(PDOException $exception){
             $this->errorMessage="Error: code:".$exception->getCode().", info:".$exception->getMessage();
             throw new Exception($exception->getCode()." ".$exception->getMessage());
-        }        
+        }
         return $number;
     }
-    
+
     /* Fetch sql records or null if error detected
      * query must be full sql string
      */
@@ -186,50 +186,50 @@ class DbUtils {
         if(!is_null($fetch_mode)){
 			$fetchMode=$fetch_mode;
         }
-         
+
         if(is_array($bindValues['offset'])) {
-        
+
             if($dbType=='mysql')
                 $sqlStr.=" limit :min, :max";
             elseif($dbType=='pgsql')
                 $sqlStr .=" limit :max offset :min";
         }
-		
-		
+
+
 		$stmt=$conn->prepare($sqlStr);
-		
+
 		if(is_array($bindValues['fields'])){
 			for($i=0; $i<count($bindValues['fields']); $i++){
 				$bindValue=$bindValues['fields'][$i]["value"];
-				
+
 				if(!is_null($bindValues['fields'][$i]['like'])){
 					$bindValue=$this->like($bindValue, $bindValues['fields'][$i]['like']);
 				}
-				
-				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
-			}			
+
+				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+			}
 		}
 		if(is_array($bindValues['offset'])){
 			for($i=0; $i<count($bindValues['offset']); $i++){
-				$stmt->bindValue($bindValues['offset'][$i]['name'], $bindValues['offset'][$i]['value'], $bindValues['offset'][$i]['dataType']);				
+				$stmt->bindValue($bindValues['offset'][$i]['name'], $bindValues['offset'][$i]['value'], $bindValues['offset'][$i]['dataType']);
 			}
 		}
         $stmt->execute();
-        
+
         try{
             if(false!==($rows=$stmt->fetchAll($fetchMode))) {
-                unset($stmt);            
+                unset($stmt);
                 return $rows;
             }
         }catch(PDOException $exception){
             $this->errorMessage="Error: code:".$exception->getCode().", info:".$exception->getMessage();
             throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
-        
-        return null;	
+
+        return null;
     }
-     
-    
+
+
     /* Fetch single sql record or null if error detected
      * query must be full sql string
      */
@@ -237,33 +237,33 @@ class DbUtils {
 
         $stmt=null;
         $row=array();
-        
+
         $bindValue=null;
         $fetchMode=PDO::FETCH_ASSOC;
         if(!is_null($fetch_mode)){
 			$fetchMode=$fetch_mode;
-        }        
-        
+        }
+
         $stmt=$conn->prepare($sqlStr);
-		
+
 		if(is_array($bindValues['fields'])){
 			for($i=0; $i<count($bindValues['fields']); $i++){
 				$bindValue=$bindValues['fields'][$i]["value"];
-				
+
 				if(!is_null($bindValues['fields'][$i]['like'])){
 					$bindValue=$this->like($bindValue, $bindValues['fields'][$i]['like']);
-				}				
-				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);				
-			}			
+				}
+				$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+			}
 		}elseif(isset($bindValues['name'])){
-			$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);	
+			$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
 		}
-        
+
         $stmt->execute();
-        
+
 		try{
             if(false!==($row=$stmt->fetch(PDO::FETCH_ASSOC))) {
-                unset($stmt);            
+                unset($stmt);
                 return $row;
             }
         }catch(PDOException $exception){
@@ -272,7 +272,7 @@ class DbUtils {
         }
         return null;
     }
-        
+
     /* Executes query for "insert / update / delete methods" */
     public function update($conn, $sqlStr){
         $stmt=null;
@@ -285,19 +285,19 @@ class DbUtils {
 		}
         return $stmt;
     }
-    
+
     /* Executes query for insert and if database type is mysql returns last inserted id */
     public function insert($conn, $sqlStr) {
         $ret=$this->update($conn, $sqlStr);
         if($this->getDbType()=="mysql") return $conn->lastInsertId();
         return $ret;
-    }    
-    
+    }
+
     /* Unset connection object */
     public function close(&$conn) {
         $conn=null;
     }
-    /* get next sequence value 
+    /* get next sequence value
     * Since 0.10
     */
     public function nextVal($conn, $sequence){
@@ -305,39 +305,39 @@ class DbUtils {
         $seqId=0;
         $ret=array();
         $sqlStr="";
-        
+
         if($dbType=='pgsql'){
-            $sqlStr="SELECT nextval('".$sequence."')"; 
+            $sqlStr="SELECT nextval('".$sequence."')";
             $ret=$conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId=$ret[0];
         }
-        
-        return $seqId;    
+
+        return $seqId;
     }
-    
+
     /* Returns last inserted id for mysql */
     public function lastInsertedId($conn) {
         $lastId=0;
         $ret=array();
         $sqlStr='';
-        
+
         if($this->getDbType()=='mysql'){
             $lastId=$conn->lastInsertId();
         }
-        
+
         return $lastId;
     }
-   
+
     /* Start transaction */
     public function beginTransaction($conn) {
         $conn->beginTransaction();
     }
-    
+
     /* Rollback transaction */
     public function rollback($conn) {
         $conn->rollBack();
     }
-    
+
     /* Commit transaction */
     public function commit($conn) {
         $conn->commit();
@@ -349,19 +349,19 @@ class DbUtils {
             return true;
         return false;
     }
-    
-    /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */    
+
+    /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */
     public function limitStr($min, $max){
     	$dbType=$this->getDbType();
         $str=array();
         $str['mysql']=" limit ".$min.", ".$max;
         $str['pgsql']=" limit ".$max." offset ".$min;
-        
+
         return $str[$dbType];
     }
-    
+
     /* For mysql true and false is 0 and 1 for postgresql true and false so it will change by database type values
-     * For example: 
+     * For example:
      * insert into table (id, active) values (12, retBooleanCondition(1));
      * where active is boolean type field inserts in mysql 1 and postgresql true
      */
@@ -369,20 +369,20 @@ class DbUtils {
         $retStr="";
         $dbType=$this->getDbType();
         $valueStr=trim($value);
-        
+
         if($dbType=="mysql"){
             if($valueStr=="false" || $valueStr=="f") $retStr="0";
-            elseif($valueStr=="true" || $valueStr=="t") $retStr="1";            
+            elseif($valueStr=="true" || $valueStr=="t") $retStr="1";
             else $retStr=$valueStr;
          }elseif($dbType=="pgsql"){
             if($valueStr==0) $retStr="false";
             elseif($valueStr==1) $retStr="true";
             else $retStr=$valueStr;
          }
-        
+
         return $retStr;
     }
-    
+
     /* Returns string or null
      * Since 0.10
      */
@@ -395,15 +395,15 @@ class DbUtils {
 		}
 		return "NULL";
 	}
-    
+
     /* Returns integer or null
      * Since 0.10
      */
 	public function intNull($digit){
 		if(!is_null($digit) && trim($digit)!=="" && intval($digit)!=0) return $digit;
 		return "NULL";
-	}   
-    
+	}
+
     /* Returns double or null
      * Since 0.10
      */
@@ -411,7 +411,7 @@ class DbUtils {
 		if(!is_null($digit) && trim($digit)!=="" && doubleval($digit)!=0.00) return $digit;
 		return "NULL";
 	}
-    
+
 }
 
 
