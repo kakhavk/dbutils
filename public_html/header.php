@@ -18,8 +18,8 @@ $active=true;
 $min=0;
 $max=100;
 
-if(isset($dbType)) $dbUtils->setDbType($dbType);
-else $dbUtils->setDbType("pgsql");
+if(isset($dbType) && !is_null($dbType)) $dbUtils->setDbType($dbType);
+if(isset($attrEmulatePrepares) && !is_null($attrEmulatePrepares)) $dbUtils->setAttrEmulatePrepares($attrEmulatePrepares);
 
 try{
     $conn=$dbUtils->connect(DBHOST, DBUSER, DBPASS, DBNAME);
@@ -47,5 +47,7 @@ try{
 	<div class="navmenuitem"><a href="example.php">Example</a></div>
 	<div class="topnavseparator"></div>
 	<div class="navmenuitem"><a href="test.php">Test</a></div>
+	<div class="topnavseparator"></div>
+	<div class="navmenuitem"><a href="import.php">Import</a></div>
 	<div class="topnavseparator"></div>
 </div>
