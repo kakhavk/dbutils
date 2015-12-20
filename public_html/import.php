@@ -2,26 +2,29 @@
 # Example for class DbUtils
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 //$dbType='mysql';
-$title="Import SQL";
-$attrEmulatePrepares=1;
+$title               = "Import SQL";
+$attrEmulatePrepares = 1;
 
-$dbType=null;
-if(isset($_REQUEST['dbtype']) && trim($_REQUEST['dbtype'])!=="") $dbType=trim($_REQUEST['dbtype']);
+$dbType = null;
+if (isset($_REQUEST['dbtype']) && trim($_REQUEST['dbtype']) !== "")
+    $dbType = trim($_REQUEST['dbtype']);
 
 require_once 'header.php';
 
-$id=0;
-$lname=null;
-$fname=null;
-$min=0;
-$max=20;
-$fetchMode=PDO::FETCH_ASSOC;
+$id        = 0;
+$lname     = null;
+$fname     = null;
+$min       = 0;
+$max       = 20;
+$fetchMode = PDO::FETCH_ASSOC;
 
-$action=null;
-$database=null;
+$action   = null;
+$database = null;
 
-if(isset($_REQUEST['action']) && trim($_REQUEST['action'])!=="") $action=trim($_REQUEST['action']);
-if(isset($_REQUEST['database']) && trim($_REQUEST['database'])!=="") $database=trim($_REQUEST['database']);
+if (isset($_REQUEST['action']) && trim($_REQUEST['action']) !== "")
+    $action = trim($_REQUEST['action']);
+if (isset($_REQUEST['database']) && trim($_REQUEST['database']) !== "")
+    $database = trim($_REQUEST['database']);
 
 
 ?>
@@ -51,7 +54,10 @@ if(isset($_REQUEST['database']) && trim($_REQUEST['database'])!=="") $database=t
 	<input type="hidden" id="action" name="action" value="import" />
     <div style="clear:both; height:10px;"></div>    
     <div class="fieldlabel">Database: </div>
-    <div class="fieldinput"><input class="fieldinputtext" type="text" id="database" name="database" value="<?php if(!is_null($database)) echo $database; ?>" /></div>
+    <div class="fieldinput"><input class="fieldinputtext" type="text" id="database" name="database" value="<?php
+if (!is_null($database))
+    echo $database;
+?>" /></div>
     <div class="fieldlabel">File to import: </div>
     <div class="fieldinput"><input type="file" id="dumpfile" name="dumpfile" /></div>
     <div style="clear:both; height:10px;"></div>
@@ -70,53 +76,55 @@ if(isset($_REQUEST['database']) && trim($_REQUEST['database'])!=="") $database=t
 </form>
 <div class="hrepasratorline"></div>
 <?php
-$errorMessage=trim($errorMessage);
+$errorMessage = trim($errorMessage);
 
 
-$sqldump=null;
-$sqlline='';
-$sqlfile=null;
-$filetoimport=null;
+$sqldump      = null;
+$sqlline      = '';
+$sqlfile      = null;
+$filetoimport = null;
 $dbUtils->setIsError(0);
-if($errorMessage==''){
-	if(!is_null($action) && $action=='import'){
-
-		$filetoimport=$_FILES['dumpfile']['tmp_name'];
-
-	
-		$sqlfile=file($filetoimport);
-
-		foreach($sqlfile as $v){
-			if(substr($v, 0, 4)=='COPY'){
-				$dbUtils->setErrorMessage('THIS TYPE OF DUMP IS NOT SUPPORTED');
-				$dbUtils->setIsError(1);
-				break;
-			}
-		}
-
-		
-		foreach($sqlfile as $v){
-			if(trim($v)!=='\.' && strpos($v, '--')!==0 && strpos($v, ' --')!==0 && !empty(trim($v))){				
-				$sqldump.=$v;
-			} 
-		}
-		
-		if($dbUtils->getIsError()==0){
-			$dbUtils->update($conn, $sqldump);
-			if($dbUtils->getIsError()==1){
-				echo $dbUtils->getErrorMessage();
-			}else{
-				echo 'Imported successfully';
-			}
-		}else{
-			echo '<div class="error">'.$dbUtils->getErrorMessage().'</div>';
-		}	
-		
-	}
+if ($errorMessage == '') {
+    if (!is_null($action) && $action == 'import') {
+        
+        $filetoimport = $_FILES['dumpfile']['tmp_name'];
+        
+        
+        $sqlfile = file($filetoimport);
+        
+        foreach ($sqlfile as $v) {
+            if (substr($v, 0, 4) == 'COPY') {
+                $dbUtils->setErrorMessage('THIS TYPE OF DUMP IS NOT SUPPORTED');
+                $dbUtils->setIsError(1);
+                break;
+            }
+        }
+        
+        
+        foreach ($sqlfile as $v) {
+            if (trim($v) !== '\.' && strpos($v, '--') !== 0 && strpos($v, ' --') !== 0 && !empty(trim($v))) {
+                $sqldump .= $v;
+            }
+        }
+        
+        if ($dbUtils->getIsError() == 0) {
+            $dbUtils->update($conn, $sqldump);
+            if ($dbUtils->getIsError() == 1) {
+                echo $dbUtils->getErrorMessage();
+            } else {
+                echo 'Imported successfully';
+            }
+        } else {
+            echo '<div class="error">' . $dbUtils->getErrorMessage() . '</div>';
+        }
+        
+    }
 }
 
 
 
 ?>   
 </div> 
-<?php require_once 'footer.php'; ?>
+<?php
+require_once 'footer.php';
+?>
