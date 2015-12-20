@@ -41,6 +41,9 @@ if(isset($_REQUEST['database']) && trim($_REQUEST['database'])!=="") $database=t
  .hrepasratorline{
 	clear:both; margin-top:20px; margin-bottom:10px; height:1px; background-color:#CCCCCC;
  }
+ .error{
+	color:red;
+ }
 </style>
 <div id="content">
 <div class="hrepasratorline"></div>
@@ -74,25 +77,41 @@ $sqldump=null;
 $sqlline='';
 $sqlfile=null;
 $filetoimport=null;
+$dbUtils->setIsError(0);
 if($errorMessage==''){
 	if(!is_null($action) && $action=='import'){
 
 		$filetoimport=$_FILES['dumpfile']['tmp_name'];
 
+	
 		$sqlfile=file($filetoimport);
+
+		foreach($sqlfile as $v){
+			if(substr($v, 0, 4)=='COPY'){
+				$dbUtils->setErrorMessage('THIS TYPE OF DUMP IS NOT SUPPORTED');
+				$dbUtils->setIsError(1);
+				break;
+			}
+		}
+
 		
 		foreach($sqlfile as $v){
-			if(trim($v)!=='\.' && strpos($v, '--')!==0 && strpos($v, ' --')!==0 && !empty(trim($v))){
+			if(trim($v)!=='\.' && strpos($v, '--')!==0 && strpos($v, ' --')!==0 && !empty(trim($v))){				
 				$sqldump.=$v;
 			} 
 		}
-
-		$dbUtils->update($conn, $sqldump);
-		if($dbUtils->getIsError()==1){
-			echo $dbUtils->getErrorMessage();
+		
+		if($dbUtils->getIsError()==0){
+			$dbUtils->update($conn, $sqldump);
+			if($dbUtils->getIsError()==1){
+				echo $dbUtils->getErrorMessage();
+			}else{
+				echo 'Imported successfully';
+			}
 		}else{
-			echo 'Imported successfully';
-		}
+			echo '<div class="error">'.$dbUtils->getErrorMessage().'</div>';
+		}	
+		
 	}
 }
 
