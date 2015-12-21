@@ -7,7 +7,7 @@
 class DbUtils
 {
     
-    protected $dbType; // mysql, pgsql
+    protected $dbType; // mysql, pgsql, mssql
     
     protected $attrEmulatePrepares; // needed for supporting multiple queries
     protected $errorMessage = null;
