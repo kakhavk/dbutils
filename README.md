@@ -1,3 +1,3 @@
 Database Utilities
 
-Access and Manage MySQL or PostgreSQL database using PHP Data Objects (PDO)
+Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Objects (PDO)
