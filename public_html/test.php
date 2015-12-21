@@ -2,13 +2,15 @@
 # Example for class DbUtils
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 
-$dbType="pgsql";
+
 $title="Test";
+
 require_once 'header.php';
 ?>
 <div id="content">
 <br />
 <?php
+
 $connectionAttributes=$dbUtils->connectionAttributes($conn,'');
 echo $connectionAttributes;
 ?>

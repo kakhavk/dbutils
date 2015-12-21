@@ -23,6 +23,7 @@ define('INCLUDES_PATH', '../include');
 define('CLASS_PATH', INCLUDES_PATH.'/classes');
 
 require_once CLASS_PATH.'/DbUtils.php';
+
 $dbUtils=new DbUtils();
 
 ?>

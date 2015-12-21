@@ -90,19 +90,21 @@ if(count($row)!=0){
 	echo '<div style="color:green;">ID:'.$row['id'].' | Name: '.$row['lname'].' '.$row['fname'].(!is_null($row['email'])?' | Email: '.$row['email']:'').'</div>';
 	echo '<div style="clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;"></div>';
 }
-
+$bindValues=null;
+/*
 $bindValues=array(
 		'fields'=>array(				
-			array('name'=>':lname', 'value'=>'n', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_ANY)
-			
+			array('name'=>':lname', 'value'=>'lname3', 'dataType'=>PDO::PARAM_STR, 'like'=>LIKE_ANY)			
 		),
+		
 		'offset'=>array(
 			array('name'=>':min', 'value'=>0, 'dataType'=>PDO::PARAM_INT),
 			array('name'=>':max', 'value'=>7, 'dataType'=>PDO::PARAM_INT)
 		)
 	);
-
-$sqlStr="select id, lname, fname, email from ".$tablename." where lname like :lname order by id desc";
+$sqlStr="select id, lname, fname, email from ".$tablename." where lname like :lname order by id desc";	
+*/
+$sqlStr="select id, lname, fname, email from ".$tablename." order by id desc";
 $rows=$dbUtils->fetchRows($conn, $sqlStr, $bindValues, $fetchMode);
 
 $rowsCount=count($rows);

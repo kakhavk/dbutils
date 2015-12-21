@@ -13,6 +13,9 @@ class DbUtils
     protected $errorMessage = null;
     protected $isError = 0;
     
+    protected $port=null;
+    
+    
     public function __construct()
     {
         $this->setDbType('pgsql');
@@ -21,12 +24,11 @@ class DbUtils
     
     /* Sets Database Type: mysql or pgsql */
     public function setDbType($dbType)
-    {
+    {    
         $dbtype = strtolower(trim($dbType));
-        if ($dbtype == 'mysqli')
-            $dbtype = 'mysql';
-        if ($dbtype == 'postgresql')
-            $dbtype = 'pgsql';
+        if ($dbtype == 'microsoftsql') $dbtype = 'mssql';
+        if ($dbtype == 'mysqli') $dbtype = 'mysql';
+        if ($dbtype == 'postgresql') $dbtype = 'pgsql';
         
         $this->dbType = $dbtype;
     }
@@ -46,6 +48,18 @@ class DbUtils
     {
         return $this->attrEmulatePrepares;
     }
+    
+    /* Set port for connection */
+    public function setPort($value)
+    {
+        $this->port = $value;
+    }
+    /* Get port for connection */
+    public function getPort()
+    {
+        return $this->port;
+    }
+    
     /* Set error message string */
     public function setErrorMessage($message)
     {
@@ -75,11 +89,11 @@ class DbUtils
         $str = null;
         if (!is_null($likeIndex) && $likeIndex != 0) {
             if ($likeIndex == 1)
-                $str = '%' . $value . '%'; // like is any
+                $str = '%'.$value.'%'; // like is any
             elseif ($likeIndex == 2)
-                $str = $value . '%'; // like is left
+                $str = $value.'%'; // like is left
             elseif ($likeIndex == 3)
-                $str = '%' . $value; // like is right
+                $str = '%'.$value; // like is right
         }
         return $str;
     }
@@ -109,7 +123,7 @@ class DbUtils
         } else {
             foreach ($pdoAttributes as $k => $v) {
                 if (null !== ($conn->getAttribute(constant("PDO::ATTR_$v"))))
-                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . $conn->getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
+                    $attr .= '<div><span style="color:navy;">'.$k.'</span>:'.$conn->getAttribute(constant('PDO::ATTR_'.$v)).'</div>';
             }
         }
         return $attr;
@@ -121,6 +135,8 @@ class DbUtils
         
         static $con;
         $dbType = $this->getDbType();
+        $port=null;
+        if(!is_null($this->port) && trim($this->port!=='')) $port=$this->port;
         
         $options = array(
             PDO::ATTR_TIMEOUT => 30,
@@ -132,16 +148,22 @@ class DbUtils
         
         if (!isset($con) || is_null($con)) {
             try {
-                $dsn = $dbType . ':host=' . $host . ';dbname=' . $dbname;
-                if ($dbType == 'oracle' || $dbType == 'oci' || $dbType == 'oci8')
-                    $dsn = 'OCI:dbname=' . $dbname . ';charset=UTF-8';
-                $con = new PDO($dsn, $user, $pass, $options);
+                $dsn = $dbType.':host='.$host .(!is_null($port)?';port='.$port:''). ';dbname='.$dbname;
+                if($dbType=='mssql'){
+					$dsn='dblib:host='.$host.(!is_null($port)?':'.$port:'').';dbname='.$dbname;
+					$options=null;
+				}
+
+
+				$con = new PDO($dsn, $user, $pass, $options);                
                 if ($dbType == "mysql") {
                     $con->prepare("SET NAMES 'utf8'")->execute();
                 }
             }
             catch (PDOException $e) {
-                $this->errorMessage .= "Problem connecting to database: " . $e . getMessage();
+
+                $this->errorMessage .= "Problem connecting to database: ".$e->getMessage();
+                echo $dsn.'<br />'.$e->getMessage();
                 return false;
             }
             
@@ -191,8 +213,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->errorMessage = "Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage();
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            $this->errorMessage = "Error: code:".$exception->getCode().", info:".$exception->getMessage();
+            throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         return $number;
     }
@@ -247,8 +269,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->errorMessage = "Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage();
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            $this->errorMessage = "Error: code:".$exception->getCode().", info:".$exception->getMessage();
+            throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         
         return null;
@@ -294,8 +316,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->errorMessage = "Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage();
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            $this->errorMessage = "Error: code:".$exception->getCode().", info:".$exception->getMessage();
+            throw new Exception($exception->getCode()." ".$exception->getMessage());
         }
         return null;
     }
@@ -340,7 +362,7 @@ class DbUtils
         $sqlStr = "";
         
         if ($dbType == 'pgsql') {
-            $sqlStr = "SELECT nextval('" . $sequence . "')";
+            $sqlStr = "SELECT nextval('".$sequence."')";
             $ret    = $conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId  = $ret[0];
         }
@@ -393,8 +415,8 @@ class DbUtils
     {
         $dbType       = $this->getDbType();
         $str          = array();
-        $str['mysql'] = " limit " . $min . ", " . $max;
-        $str['pgsql'] = " limit " . $max . " offset " . $min;
+        $str['mysql'] = " limit ".$min.", ".$max;
+        $str['pgsql'] = " limit ".$max." offset ".$min;
         
         return $str[$dbType];
     }
@@ -438,7 +460,7 @@ class DbUtils
             if (!get_magic_quotes_gpc()) {
                 $str = addslashes($str);
             }
-            return trim("'" . $str . "'");
+            return trim("'".$str."'");
         }
         return "NULL";
     }

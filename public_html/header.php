@@ -20,6 +20,7 @@ $max=100;
 
 if(isset($dbType) && !is_null($dbType)) $dbUtils->setDbType($dbType);
 if(isset($attrEmulatePrepares) && !is_null($attrEmulatePrepares)) $dbUtils->setAttrEmulatePrepares($attrEmulatePrepares);
+if(isset($port) && !is_null($port)) $dbUtils->setPort($port);
 
 try{
     $conn=$dbUtils->connect(DBHOST, DBUSER, DBPASS, DBNAME);
