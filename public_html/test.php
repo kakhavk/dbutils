@@ -6,6 +6,7 @@
 $title="Test";
 
 require_once 'header.php';
+require_once 'init.php';
 ?>
 <div id="content">
 <br />

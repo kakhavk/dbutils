@@ -3,22 +3,28 @@
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 
 $title="Example Script";
-require_once 'header.php';
+
+$tablename="users";
 
 $id=0;
 $lname=null;
 $fname=null;
+$email=null;
+$active=true;
+
 $min=0;
 $max=20;
 $fetchMode=PDO::FETCH_ASSOC;
 
 $action=null;
-if(isset($_REQUEST['action']) && trim($_REQUEST['action'])!=="") $action=trim($_REQUEST['action']);
 
+if(isset($_REQUEST['action']) && trim($_REQUEST['action'])!=="") $action=trim($_REQUEST['action']);
 if(isset($_REQUEST['lname']) && trim($_REQUEST['lname'])!=="") $lname=trim($_REQUEST['lname']); 
 if(isset($_REQUEST['fname']) && trim($_REQUEST['fname'])!=="") $fname=trim($_REQUEST['fname']);
 if(isset($_REQUEST['email']) && trim($_REQUEST['email'])!=="") $email=trim($_REQUEST['email']);
 
+require_once 'header.php';
+require_once 'init.php';
 ?>
 <style>
  .fieldlabel{

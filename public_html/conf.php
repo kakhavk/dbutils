@@ -6,7 +6,13 @@ define('LIKE_ANY',1);
 define('LIKE_LEFT',2);
 define('LIKE_RIGHT',3);
 
+$rows=array();
+$rowsCount=0;
+$sqlStr="";
+$i=0;
 
+$min=0;
+$max=100;
 /*
 if does not exists file ../conf/params.php
 it must be created and added parameters for database connection

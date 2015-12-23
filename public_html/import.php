@@ -1,21 +1,18 @@
 <?php
 # Example for class DbUtils
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
-//$dbType='mysql';
-$title               = "Import SQL";
-$attrEmulatePrepares = 1;
-
-$dbType = null;
-if (isset($_REQUEST['dbtype']) && trim($_REQUEST['dbtype']) !== "")
-    $dbType = trim($_REQUEST['dbtype']);
 
 require_once 'header.php';
 
-$id        = 0;
-$lname     = null;
-$fname     = null;
-$min       = 0;
-$max       = 20;
+
+
+$title = "Import SQL";
+$attrEmulatePrepares = 1;
+
+$dbType = null;
+if (isset($_REQUEST['dbtype']) && trim($_REQUEST['dbtype']) !== "") $dbUtils->setDbType($dbType);
+
+
 $fetchMode = PDO::FETCH_ASSOC;
 
 $action   = null;
@@ -94,7 +91,7 @@ if ($errorMessage == '') {
         
         foreach ($sqlfile as $v) {
             if (substr($v, 0, 4) == 'COPY') {
-                $dbUtils->setErrorMessage('THIS TYPE OF DUMP IS NOT SUPPORTED');
+                $dbUtils->addErrorMessage('THIS TYPE OF DUMP IS NOT SUPPORTED');
                 $dbUtils->setIsError(1);
                 break;
             }
@@ -115,7 +112,7 @@ if ($errorMessage == '') {
                 echo 'Imported successfully';
             }
         } else {
-            echo '<div class="error">' . $dbUtils->getErrorMessage() . '</div>';
+            echo $dbUtils->getErrorMessage();
         }
         
     }

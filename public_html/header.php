@@ -1,33 +1,5 @@
 <?php
 require_once 'conf.php';
-
-$rows=array();
-$rowsCount=0;
-$sqlStr="";
-$i=0;
-$errorMessage="";
-
-$tablename="users";
-
-$id=0;
-$lname=null;
-$fname=null;
-$email=null;
-$active=true;
-
-$min=0;
-$max=100;
-
-if(isset($dbType) && !is_null($dbType)) $dbUtils->setDbType($dbType);
-if(isset($attrEmulatePrepares) && !is_null($attrEmulatePrepares)) $dbUtils->setAttrEmulatePrepares($attrEmulatePrepares);
-if(isset($port) && !is_null($port)) $dbUtils->setPort($port);
-
-try{
-    $conn=$dbUtils->connect(DBHOST, DBUSER, DBPASS, DBNAME);
-}catch(Exception $e) {
-    $errorMessage="Unable connect to database";
-}
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

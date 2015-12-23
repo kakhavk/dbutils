@@ -25,3 +25,7 @@ body #content{
 	height:15px; 
 	background-color:grey;
 }
+
+.errormessage{
+	color:red;
+}
