@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.3
+# Version 1.4
 
 class DbUtils
 {
@@ -20,7 +20,7 @@ class DbUtils
     
     public function __construct()
     {
-        $this->setDbType('pgsql');
+        $this->setDbType('pgsql'); //by default database type is postgresql
         $this->setAttrEmulatePrepares(0);
         $this->options=array(
 				PDO::ATTR_TIMEOUT => 30,

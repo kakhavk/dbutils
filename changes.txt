@@ -1,0 +1,12 @@
+1.3 version changes
+--------------------
+Add support for MicrosoftSQL accessing and crud actions
+
+
+1.4 version changes
+--------------------
+Add function setDsn to set custom dsn 
+Add function setOptions to set custom parameters for connection opotions
+Add function addErrorMessage where messages is saved in array and later 
+Add function getErrorMessage to get formatted error message
+ 
