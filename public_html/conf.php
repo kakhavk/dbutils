@@ -23,13 +23,15 @@ define('DBPASS','password');
 define('DBNAME','databasename');
 */
 
+require_once '../conf/params.php';
+
 $dbhost=DBHOST;
 $dbuser=DBUSER;
 $dbpass=DBPASS;
 $dbname=DBNAME;
 
 
-require_once '../conf/params.php';
+
 
 define('INCLUDES_PATH', '../include');
 define('CLASS_PATH', INCLUDES_PATH.'/classes');
