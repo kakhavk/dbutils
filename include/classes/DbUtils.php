@@ -17,6 +17,8 @@ class DbUtils
     
     protected $port=null;
     
+    private $params=array();
+    
     
     public function __construct()
     {
@@ -29,6 +31,7 @@ class DbUtils
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
 				PDO::ATTR_EMULATE_PREPARES => $this->attrEmulatePrepares
             );
+        $this->setParams(array('dbhost'=>DBHOST, 'dbuser'=>DBUSER, 'dbpass'=>DBPASS, 'dbname'=>DBNAME));
         $this->setDsn(null);
         
     }
@@ -54,6 +57,18 @@ class DbUtils
     {
         $this->attrEmulatePrepares = $value;
     }
+    
+
+    /* Set Host for database */
+    public function setParams($params=array())
+    {
+        if(is_array($params)){
+			foreach($params as $k => $v) $this->params[$k]=$v;
+        }
+    }
+    
+    
+    
     /* Get ATTR_EMULATE_PREPARES for connection */
     public function getAttrEmulatePrepares()
     {
@@ -171,11 +186,17 @@ class DbUtils
     }
     
     /* Create connection */
-    public function connect($host, $user, $pass, $dbname)
+    public function connect()
     {
         
         static $con;
         $dbType = $this->getDbType();
+        
+        $host=$this->params['dbhost'];
+        $user=$this->params['dbuser'];
+        $pass=$this->params['dbpass'];
+        $dbname=$this->params['dbname'];
+        
         $port=null;
         $dsn=null;
         if(!is_null($this->port) && trim($this->port!=='')) $port=$this->port;
