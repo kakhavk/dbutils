@@ -9,40 +9,48 @@ class DbUtils
     
     protected $dbType; // mysql, pgsql, mssql
     
-    protected $attrEmulatePrepares=0; // needed for supporting multiple queries
+    protected $attrEmulatePrepares = 0; // needed for supporting multiple queries
     protected $errorMessages = array();
     protected $isError = 0;
     protected $options = array();
-    protected $dsn=null;
+    protected $dsn = null;
     
-    protected $port=null;
+    protected $port = null;
     
-    private $params=array();
+    private $params = array();
     
     
     public function __construct()
     {
         $this->setDbType('pgsql'); //by default database type is postgresql
         $this->setAttrEmulatePrepares(0);
-        $this->options=array(
-				PDO::ATTR_TIMEOUT => 30,
-				PDO::ATTR_PERSISTENT => true,
-				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-				PDO::ATTR_EMULATE_PREPARES => $this->attrEmulatePrepares
-            );
-        $this->setParams(array('dbhost'=>DBHOST, 'dbuser'=>DBUSER, 'dbpass'=>DBPASS, 'dbname'=>DBNAME));
+        $this->options = array(
+            PDO::ATTR_TIMEOUT => 30,
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_EMULATE_PREPARES => $this->attrEmulatePrepares
+        );
+        $this->setParams(array(
+            'dbhost' => DBHOST,
+            'dbuser' => DBUSER,
+            'dbpass' => DBPASS,
+            'dbname' => DBNAME
+        ));
         $this->setDsn(null);
         
     }
     
     /* Sets Database Type: mysql or pgsql */
     public function setDbType($dbType)
-    {    
+    {
         $dbtype = strtolower(trim($dbType));
-        if ($dbtype == 'microsoftsql') $dbtype = 'mssql';
-        if ($dbtype == 'mysqli') $dbtype = 'mysql';
-        if ($dbtype == 'postgresql') $dbtype = 'pgsql';
+        if ($dbtype == 'microsoftsql')
+            $dbtype = 'mssql';
+        if ($dbtype == 'mysqli')
+            $dbtype = 'mysql';
+        if ($dbtype == 'postgresql')
+            $dbtype = 'pgsql';
         
         $this->dbType = $dbtype;
     }
@@ -58,12 +66,13 @@ class DbUtils
         $this->attrEmulatePrepares = $value;
     }
     
-
+    
     /* Set Host for database */
-    public function setParams($params=array())
+    public function setParams($params = array())
     {
-        if(is_array($params)){
-			foreach($params as $k => $v) $this->params[$k]=$v;
+        if (is_array($params)) {
+            foreach ($params as $k => $v)
+                $this->params[$k] = $v;
         }
     }
     
@@ -76,9 +85,10 @@ class DbUtils
     }
     
     /* Set connectin dsn */
-    public function setDsn($dsn=null)
+    public function setDsn($dsn = null)
     {
-		if(isset($dsn) && !empty($dsn)) $this->dsn = $dsn;		
+        if (isset($dsn) && !empty($dsn))
+            $this->dsn = $dsn;
     }
     /* Get connection dsn */
     public function getDsn()
@@ -87,11 +97,13 @@ class DbUtils
     }
     
     /* Set connectin options */
-    public function setOptions($options=array())
+    public function setOptions($options = array())
     {
-		if(isset($options) && is_array($options) && !is_null($options)) $this->options = $options;
-		else $this->addErrorMessage('options was not set properly');
-		
+        if (isset($options) && is_array($options) && !is_null($options))
+            $this->options = $options;
+        else
+            $this->addErrorMessage('options was not set properly');
+        
     }
     /* Get connection options */
     public function getOptions()
@@ -114,17 +126,18 @@ class DbUtils
     public function addErrorMessage($message)
     {
         array_push($this->errorMessages, $message);
-        $this->isError=1;
+        $this->isError = 1;
     }
     /* Get error message string */
     public function getErrorMessage()
     {
-		$formatedStr='';
-		$errorMessages=$this->errorMessages;		
-		
-		for($i=0; $i<count($errorMessages); $i++) $formatedStr.='<div class="errormessage">'.$errorMessages[$i].'</div>';
-		
-		return $formatedStr;
+        $formatedStr   = '';
+        $errorMessages = $this->errorMessages;
+        
+        for ($i = 0; $i < count($errorMessages); $i++)
+            $formatedStr .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
+        
+        return $formatedStr;
     }
     
     /* Set error state */
@@ -147,43 +160,45 @@ class DbUtils
         static $con;
         $dbType = $this->getDbType();
         
-        $host=$this->params['dbhost'];
-        $user=$this->params['dbuser'];
-        $pass=$this->params['dbpass'];
-        $dbname=$this->params['dbname'];
+        $host   = $this->params['dbhost'];
+        $user   = $this->params['dbuser'];
+        $pass   = $this->params['dbpass'];
+        $dbname = $this->params['dbname'];
         
-        $port=null;
-        $dsn=null;
-        if(!is_null($this->port) && trim($this->port!=='')) $port=$this->port;
-        if(!is_null($this->dsn)) $dsn=$this->dsn;
+        $port = null;
+        $dsn  = null;
+        if (!is_null($this->port) && trim($this->port !== ''))
+            $port = $this->port;
+        if (!is_null($this->dsn))
+            $dsn = $this->dsn;
         
         $options = $this->options;
         
         if (!isset($con) || is_null($con)) {
             try {
-				if(is_null($dsn)){
-					$dsn = $dbType.':host='.$host .(!is_null($port)?';port='.$port:''). ';dbname='.$dbname;
-					if($dbType=='mssql'){
-						$dsn='dblib:host='.$host.(!is_null($port)?':'.$port:'').';dbname='.$dbname;
-						$options=null;
-					}					
-				}
-
-				$con = new PDO($dsn, $user, $pass, $options);                
+                if (is_null($dsn)) {
+                    $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
+                    if ($dbType == 'mssql') {
+                        $dsn     = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
+                        $options = null;
+                    }
+                }
+                
+                $con = new PDO($dsn, $user, $pass, $options);
                 if ($dbType == "mysql") {
                     $con->prepare("SET NAMES 'utf8'")->execute();
                 }
             }
             catch (PDOException $e) {
-
-                $this->addErrorMessages("Problem connecting to database: ".$e->getMessage());
+                
+                $this->addErrorMessages("Problem connecting to database: " . $e->getMessage());
                 return false;
             }
             
         }
         
         return $con;
-    }    
+    }
     
     /* parse like condition is query */
     public function like($value, $likeIndex)
@@ -191,11 +206,11 @@ class DbUtils
         $str = null;
         if (!is_null($likeIndex) && $likeIndex != 0) {
             if ($likeIndex == 1)
-                $str = '%'.$value.'%'; // like is any
+                $str = '%' . $value . '%'; // like is any
             elseif ($likeIndex == 2)
-                $str = $value.'%'; // like is left
+                $str = $value . '%'; // like is left
             elseif ($likeIndex == 3)
-                $str = '%'.$value; // like is right
+                $str = '%' . $value; // like is right
         }
         return $str;
     }
@@ -241,8 +256,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->addErrorMessage("Error: code:".$exception->getCode().", info:".$exception->getMessage());
-            throw new Exception($exception->getCode()." ".$exception->getMessage());
+            $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
+            throw new Exception($exception->getCode() . " " . $exception->getMessage());
         }
         return $number;
     }
@@ -297,8 +312,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->addErrorMessage("Error: code:".$exception->getCode().", info:".$exception->getMessage());
-            throw new Exception($exception->getCode()." ".$exception->getMessage());
+            $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
+            throw new Exception($exception->getCode() . " " . $exception->getMessage());
         }
         
         return null;
@@ -344,8 +359,8 @@ class DbUtils
             }
         }
         catch (PDOException $exception) {
-            $this->addErrorMessage("Error: code:".$exception->getCode().", info:".$exception->getMessage());
-            throw new Exception($exception->getCode()." ".$exception->getMessage());
+            $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
+            throw new Exception($exception->getCode() . " " . $exception->getMessage());
         }
         return null;
     }
@@ -390,7 +405,7 @@ class DbUtils
         $sqlStr = "";
         
         if ($dbType == 'pgsql') {
-            $sqlStr = "SELECT nextval('".$sequence."')";
+            $sqlStr = "SELECT nextval('" . $sequence . "')";
             $ret    = $conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId  = $ret[0];
         }
@@ -443,8 +458,8 @@ class DbUtils
     {
         $dbType       = $this->getDbType();
         $str          = array();
-        $str['mysql'] = " limit ".$min.", ".$max;
-        $str['pgsql'] = " limit ".$max." offset ".$min;
+        $str['mysql'] = " limit " . $min . ", " . $max;
+        $str['pgsql'] = " limit " . $max . " offset " . $min;
         
         return $str[$dbType];
     }
@@ -488,7 +503,7 @@ class DbUtils
             if (!get_magic_quotes_gpc()) {
                 $str = addslashes($str);
             }
-            return trim("'".$str."'");
+            return trim("'" . $str . "'");
         }
         return "NULL";
     }
@@ -512,8 +527,8 @@ class DbUtils
             return $digit;
         return "NULL";
     }
-
-	/* Returns connection attributes*/
+    
+    /* Returns connection attributes*/
     public function connectionAttributes($conn, $attributeName = "")
     {
         $attr = "";
@@ -539,11 +554,11 @@ class DbUtils
         } else {
             foreach ($pdoAttributes as $k => $v) {
                 if (null !== ($conn->getAttribute(constant("PDO::ATTR_$v"))))
-                    $attr .= '<div><span style="color:navy;">'.$k.'</span>:'.$conn->getAttribute(constant('PDO::ATTR_'.$v)).'</div>';
+                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . $conn->getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
             }
         }
         return $attr;
-    }    
+    }
     
     
 }
