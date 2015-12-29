@@ -139,51 +139,6 @@ class DbUtils
         return $this->isError;
     }
     
-    /* parse like condition is query */
-    public function like($value, $likeIndex)
-    {
-        $str = null;
-        if (!is_null($likeIndex) && $likeIndex != 0) {
-            if ($likeIndex == 1)
-                $str = '%'.$value.'%'; // like is any
-            elseif ($likeIndex == 2)
-                $str = $value.'%'; // like is left
-            elseif ($likeIndex == 3)
-                $str = '%'.$value; // like is right
-        }
-        return $str;
-    }
-    
-    public function connectionAttributes($conn, $attributeName = "")
-    {
-        $attr = "";
-        
-        
-        $pdoAttributes = array(
-            //"Autocommit"=>'AUTOCOMMIT',
-            "Case" => "CASE",
-            "Client Version" => "CLIENT_VERSION",
-            "Connection Status" => "CONNECTION_STATUS",
-            "Driver Name" => "DRIVER_NAME",
-            "Error Mode" => "ERRMODE",
-            "ORACLE Nulls" => "ORACLE_NULLS",
-            "Persistent" => "PERSISTENT",
-            //"Prefetch"=>"PREFETCH",
-            "Server info" => "SERVER_INFO",
-            "Server Version" => "SERVER_VERSION"
-            //"Timeout"=>"TIMEOUT"
-        );
-        
-        if (isset($attributeName) && !is_null($attributeName) && trim($attributeName) !== "") {
-            $attr = $conn->getAttribute(constant("PDO::ATTR_$attributeName"));
-        } else {
-            foreach ($pdoAttributes as $k => $v) {
-                if (null !== ($conn->getAttribute(constant("PDO::ATTR_$v"))))
-                    $attr .= '<div><span style="color:navy;">'.$k.'</span>:'.$conn->getAttribute(constant('PDO::ATTR_'.$v)).'</div>';
-            }
-        }
-        return $attr;
-    }
     
     /* Create connection */
     public function connect()
@@ -228,6 +183,21 @@ class DbUtils
         }
         
         return $con;
+    }    
+    
+    /* parse like condition is query */
+    public function like($value, $likeIndex)
+    {
+        $str = null;
+        if (!is_null($likeIndex) && $likeIndex != 0) {
+            if ($likeIndex == 1)
+                $str = '%'.$value.'%'; // like is any
+            elseif ($likeIndex == 2)
+                $str = $value.'%'; // like is left
+            elseif ($likeIndex == 3)
+                $str = '%'.$value; // like is right
+        }
+        return $str;
     }
     
     
@@ -542,6 +512,39 @@ class DbUtils
             return $digit;
         return "NULL";
     }
+
+	/* Returns connection attributes*/
+    public function connectionAttributes($conn, $attributeName = "")
+    {
+        $attr = "";
+        
+        
+        $pdoAttributes = array(
+            //"Autocommit"=>'AUTOCOMMIT',
+            "Case" => "CASE",
+            "Client Version" => "CLIENT_VERSION",
+            "Connection Status" => "CONNECTION_STATUS",
+            "Driver Name" => "DRIVER_NAME",
+            "Error Mode" => "ERRMODE",
+            "ORACLE Nulls" => "ORACLE_NULLS",
+            "Persistent" => "PERSISTENT",
+            //"Prefetch"=>"PREFETCH",
+            "Server info" => "SERVER_INFO",
+            "Server Version" => "SERVER_VERSION"
+            //"Timeout"=>"TIMEOUT"
+        );
+        
+        if (isset($attributeName) && !is_null($attributeName) && trim($attributeName) !== "") {
+            $attr = $conn->getAttribute(constant("PDO::ATTR_$attributeName"));
+        } else {
+            foreach ($pdoAttributes as $k => $v) {
+                if (null !== ($conn->getAttribute(constant("PDO::ATTR_$v"))))
+                    $attr .= '<div><span style="color:navy;">'.$k.'</span>:'.$conn->getAttribute(constant('PDO::ATTR_'.$v)).'</div>';
+            }
+        }
+        return $attr;
+    }    
+    
     
 }
 
