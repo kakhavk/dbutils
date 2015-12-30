@@ -7,6 +7,16 @@ Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Object
 ```sh
 require_once 'DbUtils.php';
 $dbUtils=new DbUtils();
+
+$dbUtils->setParams(
+    array(
+        'dbhost'=>'hostname', 
+        'dbuser'=>'username', 
+        'dbpass'=>'password', 
+        'dbname'=>'database'
+    )
+);
+
 $dbUtils->setDbType('mysql');
 $conn=$dbUtils->connect();
 $rows=$dbUtils->fetchRows($conn, "select * from table", null, null);
