@@ -2,6 +2,23 @@ Database Utilities
 
 Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Objects (PDO)
 
+Simple Usage:
 
+require_once 'DbUtils.php';
+$dbUtils=new DbUtils();
 
+$dbUtils->setParams(
+    array(
+        'dbhost'=>'hostname', 
+        'dbuser'=>'username', 
+        'dbpass'=>'password', 
+        'dbname'=>'database'
+    )
+);
 
+$dbUtils->setDbType('mysql');
+$conn=$dbUtils->connect();
+$rows=$dbUtils->fetchRows($conn, "select * from table", null, null);
+for($i=0; $i<count($rows); $i++){
+    echo $rows['columnname'];
+}
