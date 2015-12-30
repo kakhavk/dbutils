@@ -21,6 +21,6 @@ $dbUtils->setDbType('mysql');
 $conn=$dbUtils->connect();
 $rows=$dbUtils->fetchRows($conn, "select * from table");
 for($i=0; $i<count($rows); $i++){
-    echo $rows['columnname'];
+    echo $rows[$i]['columnname'];
 }
 ```
