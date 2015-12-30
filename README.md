@@ -3,7 +3,7 @@
 Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Objects (PDO)
 
 
-### Simple Usagee:
+### Simple Usage:
 ```sh
 require_once 'DbUtils.php';
 $dbUtils=new DbUtils();
