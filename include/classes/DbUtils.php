@@ -23,7 +23,7 @@ class DbUtils
     protected $port = null;    
     
     private $params = array();
-    private $initializeConnect=0; //if set to 1, the method connect is not necessary
+    private $initializeConnect=0; //if set to 1, call method connect is not necessary
     private static $con;
     
     public function __construct()
