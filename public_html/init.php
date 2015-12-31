@@ -1,3 +1,0 @@
-<?php
-$dbUtils->connect();
-
