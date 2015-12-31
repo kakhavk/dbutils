@@ -2,43 +2,39 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.4.1
+# Version 1.5
 
 class DbUtils
 {
     
-    protected $dbType; // mysql, pgsql, mssql
+    protected $dbType='mysql'; // mysql, pgsql, mssql
     
     protected $attrEmulatePrepares = 0; // needed for supporting multiple queries
     protected $errorMessages = array();
     protected $isError = 0;
-    protected $options = array();
+    protected $options = array(
+		PDO::ATTR_TIMEOUT => 30,
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_EMULATE_PREPARES => 0
+    );
     protected $dsn = null;    
     protected $port = null;    
     
-    private $params = array();
+    private $params = array(
+		'dbhost' => 'localhost',
+        'dbuser' => 'username',
+        'dbpass' => 'password',
+        'dbname' => 'database'
+    );
     private $initializeConnect=0; //if set to 1, the method connect is not necessary
     private static $con;
     
     public function __construct()
     {
-        $this->setDbType('pgsql'); //by default database type is postgresql
-        $this->setAttrEmulatePrepares(0);
-        $this->options = array(
-            PDO::ATTR_TIMEOUT => 30,
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-            PDO::ATTR_EMULATE_PREPARES => $this->attrEmulatePrepares
-        );
-        $this->setParams(array(
-            'dbhost' => DBHOST,
-            'dbuser' => DBUSER,
-            'dbpass' => DBPASS,
-            'dbname' => DBNAME
-        ));
-        $this->setDsn(null);
-        
+        $this->setDbType('mysql'); //by default database type is mysql
+        $this->setDsn(null);        
         if($this->initializeConnect==1) $this->connect();
         
     }
@@ -193,7 +189,7 @@ class DbUtils
             }
             catch (PDOException $e) {
                 
-                $this->addErrorMessages("Problem connecting to database: " . $e->getMessage());
+                $this->addErrorMessage("Problem connecting to database: " . $e->getMessage());
                 return false;
             }
             
