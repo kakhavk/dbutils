@@ -19,8 +19,8 @@ $dbUtils->setParams(
 
 $dbUtils->setDbType('mysql');
 $dbUtils->connect();
-$rows=$dbUtils->fetchRows("select * from table");
+$rows=$dbUtils->fetchRows("select * from users");
 for($i=0; $i<count($rows); $i++){
-    echo $rows[$i]['columnname'];
+    echo $rows[$i]['lname']." ".$rows[$i]['fname']."\n";
 }
 ```
