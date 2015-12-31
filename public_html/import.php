@@ -105,7 +105,7 @@ if ($errorMessage == '') {
         }
         
         if ($dbUtils->getIsError() == 0) {
-            $dbUtils->update($conn, $sqldump);
+            $dbUtils->update($sqldump);
             if ($dbUtils->getIsError() == 1) {
                 echo $dbUtils->getErrorMessage();
             } else {

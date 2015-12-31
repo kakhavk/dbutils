@@ -40,4 +40,5 @@ require_once CLASS_PATH.'/DbUtils.php';
 
 $dbUtils=new DbUtils();
 
+$dbUtils->connect();
 ?>

@@ -1,3 +1,3 @@
 <?php
-$conn=$dbUtils->connect();
+$dbUtils->connect();
 

@@ -13,12 +13,12 @@ class DbUtils
     protected $errorMessages = array();
     protected $isError = 0;
     protected $options = array();
-    protected $dsn = null;
-    
-    protected $port = null;
+    protected $dsn = null;    
+    protected $port = null;    
     
     private $params = array();
-    
+    private $initializeConnect=0; //if set to 1, the method connect is not necessary
+    private static $con;
     
     public function __construct()
     {
@@ -38,6 +38,8 @@ class DbUtils
             'dbname' => DBNAME
         ));
         $this->setDsn(null);
+        
+        if($this->initializeConnect==1) $this->connect();
         
     }
     
@@ -157,7 +159,7 @@ class DbUtils
     public function connect()
     {
         
-        static $con;
+        
         $dbType = $this->getDbType();
         
         $host   = $this->params['dbhost'];
@@ -174,7 +176,7 @@ class DbUtils
         
         $options = $this->options;
         
-        if (!isset($con) || is_null($con)) {
+        if (!isset($this->con) || is_null($this->con)) {
             try {
                 if (is_null($dsn)) {
                     $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
@@ -184,9 +186,9 @@ class DbUtils
                     }
                 }
                 
-                $con = new PDO($dsn, $user, $pass, $options);
+                $this->con = new PDO($dsn, $user, $pass, $options);
                 if ($dbType == "mysql") {
-                    $con->prepare("SET NAMES 'utf8'")->execute();
+                    $this->con->prepare("SET NAMES 'utf8'")->execute();
                 }
             }
             catch (PDOException $e) {
@@ -197,7 +199,7 @@ class DbUtils
             
         }
         
-        return $con;
+        return $this->con;
     }
     
     /* parse like condition is query */
@@ -220,7 +222,7 @@ class DbUtils
      * query must be full sql string and must return one value.
      * For example: select count(id) from tablename
      */
-    public function getNumber($conn, $sqlStr, $bindValues = array())
+    public function getNumber($sqlStr, $bindValues = array())
     {
         $number    = 0;
         $row       = array();
@@ -232,9 +234,9 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        $stmt = $conn->prepare($sqlStr);
-        if (!is_null($bindValues)) {
-            if (is_array($bindValues['fields'])) {
+        $stmt = $this->con->prepare($sqlStr);
+        if (isset($bindValues) && is_array($bindValues)) {
+            if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
                     $bindValue = $bindValues['fields'][$i]["value"];
                     
@@ -265,7 +267,7 @@ class DbUtils
     /* Fetch sql records or null if error detected
      * query must be full sql string
      */
-    public function fetchRows($conn, $sqlStr, $bindValues = array(), $fetch_mode = null)
+    public function fetchRows($sqlStr, $bindValues = array(), $fetch_mode = null)
     {
         $dbType    = $this->getDbType();
         $stmt      = null;
@@ -276,7 +278,7 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        if (is_array($bindValues['offset'])) {
+        if (isset($bindValues['offset']) && is_array($bindValues['offset'])) {
             
             if ($dbType == 'mysql')
                 $sqlStr .= " limit :min, :max";
@@ -285,9 +287,9 @@ class DbUtils
         }
         
         
-        $stmt = $conn->prepare($sqlStr);
+        $stmt = $this->con->prepare($sqlStr);
         
-        if (is_array($bindValues['fields'])) {
+        if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
                 $bindValue = $bindValues['fields'][$i]["value"];
                 
@@ -298,7 +300,7 @@ class DbUtils
                 $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
         }
-        if (is_array($bindValues['offset'])) {
+        if (isset($bindValues['offset']) && is_array($bindValues['offset'])) {
             for ($i = 0; $i < count($bindValues['offset']); $i++) {
                 $stmt->bindValue($bindValues['offset'][$i]['name'], $bindValues['offset'][$i]['value'], $bindValues['offset'][$i]['dataType']);
             }
@@ -323,7 +325,7 @@ class DbUtils
     /* Fetch single sql record or null if error detected
      * query must be full sql string
      */
-    public function fetchRow($conn, $sqlStr, $bindValues = array(), $fetch_mode = null)
+    public function fetchRow($sqlStr, $bindValues = array(), $fetch_mode = null)
     {
         
         $stmt = null;
@@ -335,9 +337,9 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        $stmt = $conn->prepare($sqlStr);
+        $stmt = $this->con->prepare($sqlStr);
         
-        if (is_array($bindValues['fields'])) {
+        if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
                 $bindValue = $bindValues['fields'][$i]["value"];
                 
@@ -366,11 +368,11 @@ class DbUtils
     }
     
     /* Executes query for "insert / update / delete methods" */
-    public function update($conn, $sqlStr)
+    public function update($sqlStr)
     {
         $stmt = null;
         try {
-            $stmt = $conn->prepare($sqlStr);
+            $stmt = $this->con->prepare($sqlStr);
             $stmt->execute();
         }
         catch (PDOException $pdoe) {
@@ -381,23 +383,23 @@ class DbUtils
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    public function insert($conn, $sqlStr)
+    public function insert($sqlStr)
     {
-        $ret = $this->update($conn, $sqlStr);
+        $ret = $this->update($sqlStr);
         if ($this->getDbType() == "mysql")
-            return $conn->lastInsertId();
+            return $this->con->lastInsertId();
         return $ret;
     }
     
     /* Unset connection object */
-    public function close(&$conn)
+    public function close()
     {
-        $conn = null;
+        $this->con = null;
     }
     /* get next sequence value
      * Since 0.10
      */
-    public function nextVal($conn, $sequence)
+    public function nextVal($sequence)
     {
         $dbType = $this->getDbType();
         $seqId  = 0;
@@ -406,7 +408,7 @@ class DbUtils
         
         if ($dbType == 'pgsql') {
             $sqlStr = "SELECT nextval('" . $sequence . "')";
-            $ret    = $conn->query($sqlStr)->fetch(PDO::FETCH_NUM);
+            $ret    = $this->con->query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId  = $ret[0];
         }
         
@@ -414,35 +416,35 @@ class DbUtils
     }
     
     /* Returns last inserted id for mysql */
-    public function lastInsertedId($conn)
+    public function lastInsertedId()
     {
         $lastId = 0;
         $ret    = array();
         $sqlStr = '';
         
         if ($this->getDbType() == 'mysql') {
-            $lastId = $conn->lastInsertId();
+            $lastId = $this->con->lastInsertId();
         }
         
         return $lastId;
     }
     
     /* Start transaction */
-    public function beginTransaction($conn)
+    public function beginTransaction()
     {
-        $conn->beginTransaction();
+        $this->con->beginTransaction();
     }
     
     /* Rollback transaction */
-    public function rollback($conn)
+    public function rollback()
     {
-        $conn->rollBack();
+        $this->con->rollBack();
     }
     
     /* Commit transaction */
-    public function commit($conn)
+    public function commit()
     {
-        $conn->commit();
+        $this->con->commit();
     }
     
     /* Checks if row is array and has records */
@@ -529,10 +531,9 @@ class DbUtils
     }
     
     /* Returns connection attributes*/
-    public function connectionAttributes($conn, $attributeName = "")
+    public function connectionAttributes($attributeName = "")
     {
         $attr = "";
-        
         
         $pdoAttributes = array(
             //"Autocommit"=>'AUTOCOMMIT',
@@ -550,11 +551,11 @@ class DbUtils
         );
         
         if (isset($attributeName) && !is_null($attributeName) && trim($attributeName) !== "") {
-            $attr = $conn->getAttribute(constant("PDO::ATTR_$attributeName"));
+            $attr = $this->con->getAttribute(constant("PDO::ATTR_$attributeName"));
         } else {
             foreach ($pdoAttributes as $k => $v) {
-                if (null !== ($conn->getAttribute(constant("PDO::ATTR_$v"))))
-                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . $conn->getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
+                if (null !== ($this->con->getAttribute(constant("PDO::ATTR_$v"))))
+                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . $this->con->getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
             }
         }
         return $attr;

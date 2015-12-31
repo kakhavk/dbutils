@@ -24,7 +24,9 @@ if(isset($_REQUEST['fname']) && trim($_REQUEST['fname'])!=="") $fname=trim($_REQ
 if(isset($_REQUEST['email']) && trim($_REQUEST['email'])!=="") $email=trim($_REQUEST['email']);
 
 require_once 'header.php';
-require_once 'init.php';
+
+
+
 ?>
 <style>
  .fieldlabel{
@@ -66,9 +68,9 @@ if($errorMessage=='' && !is_null($action) && $action=='update'){
 	elseif(filter_var($email, FILTER_VALIDATE_EMAIL)==false) $errorMessage.='Email '.trim($_REQUEST['email']).' is not valid';
     if($errorMessage==''){
 		if($id==0){
-			$id=$dbUtils->nextval($conn, 'users_id_seq');        
+			$id=$dbUtils->nextval('users_id_seq');        
 			$sqlStr='insert into '.$tablename.' (id, lname, fname, email, active) values ('.$id.', '.$dbUtils->strNull($lname).', '.$dbUtils->strNull($fname).', '.$dbUtils->strNull($email).', '.$dbUtils->booleanCondition($active).')';  
-			$dbUtils->insert($conn, $sqlStr);
+			$dbUtils->insert($sqlStr);
 			echo '<script type="text/javascript"> gotoPage("./example.php"); </script>';
 			
 		}else{
@@ -80,7 +82,7 @@ if($errorMessage=='' && !is_null($action) && $action=='update'){
 			', active='.$dbUtils->booleanCondition($active).
 			' where id='.$id;
 			
-			$dbUtils->update($conn, $sqlStr);
+			$dbUtils->update($sqlStr);
 			echo '<script type="text/javascript"> gotoPage("./example.php"); </script>';
 		}    
     }
@@ -91,7 +93,7 @@ if($errorMessage=='' && !is_null($action) && $action=='update'){
 }
 
 $sqlStr="select id, lname, fname, email from ".$tablename." where id=:id";
-$row=$dbUtils->fetchRow($conn, $sqlStr, array('name'=>id, 'value'=>1, 'dataType'=>PDO::PARAM_INT), $fetchMode);
+$row=$dbUtils->fetchRow($sqlStr, array('name'=>id, 'value'=>1, 'dataType'=>PDO::PARAM_INT), $fetchMode);
 if(count($row)!=0){
 	echo '<div style="color:green;">ID:'.$row['id'].' | Name: '.$row['lname'].' '.$row['fname'].(!is_null($row['email'])?' | Email: '.$row['email']:'').'</div>';
 	echo '<div style="clear:both; margin-top:5px; height:1px; width:500px; background-color:#CCCCCC;"></div>';
@@ -111,7 +113,7 @@ $bindValues=array(
 $sqlStr="select id, lname, fname, email from ".$tablename." where lname like :lname order by id desc";	
 */
 $sqlStr="select id, lname, fname, email from ".$tablename." order by id desc";
-$rows=$dbUtils->fetchRows($conn, $sqlStr, $bindValues, $fetchMode);
+$rows=$dbUtils->fetchRows($sqlStr, $bindValues, $fetchMode);
 
 $rowsCount=count($rows);
 if($rowsCount!=0){
