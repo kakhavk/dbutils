@@ -22,19 +22,24 @@ class DbUtils
     protected $dsn = null;    
     protected $port = null;    
     
-    private $params = array(
-		'dbhost' => 'localhost',
-        'dbuser' => 'username',
-        'dbpass' => 'password',
-        'dbname' => 'database'
-    );
+    private $params = array();
     private $initializeConnect=0; //if set to 1, the method connect is not necessary
     private static $con;
     
     public function __construct()
-    {
+    {	
+
         $this->setDbType('mysql'); //by default database type is mysql
-        $this->setDsn(null);        
+        $this->setDsn(null);
+        
+		$params=array();        
+        
+        if(defined('DBHOST')) $params['dbhost']=DBHOST;
+        if(defined('DBUSER')) $params['dbuser']=DBUSER;
+        if(defined('DBPASS')) $params['dbpass']=DBPASS;
+        if(defined('DBNAME')) $params['dbname']=DBNAME;
+        $this->setParams($params);
+        
         if($this->initializeConnect==1) $this->connect();
         
     }
@@ -127,15 +132,17 @@ class DbUtils
         $this->isError = 1;
     }
     /* Get error message string */
-    public function getErrorMessage()
+    public function getErrorMessage($formatted=1)
     {
-        $formatedStr   = '';
+        $str   = '';
         $errorMessages = $this->errorMessages;
         
-        for ($i = 0; $i < count($errorMessages); $i++)
-            $formatedStr .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
+        for ($i = 0; $i < count($errorMessages); $i++){
+            if($formatted==1) $str .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
+            else $str .= $errorMessages[$i] ."\n";
+        }
         
-        return $formatedStr;
+        return $str;
     }
     
     /* Set error state */
@@ -173,19 +180,22 @@ class DbUtils
         $options = $this->options;
         
         if (!isset($this->con) || is_null($this->con)) {
-            try {
-                if (is_null($dsn)) {
+        
+				if (is_null($dsn)) {
                     $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
                     if ($dbType == 'mssql') {
                         $dsn     = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
                         $options = null;
                     }
-                }
+                }        
+        
+            try {
+                
                 
                 $this->con = new PDO($dsn, $user, $pass, $options);
-                if ($dbType == "mysql") {
-                    $this->con->prepare("SET NAMES 'utf8'")->execute();
-                }
+                if ($dbType == "mysql" && $this->con) {
+				   $this->con->prepare("SET NAMES 'utf8'")->execute();
+				}
             }
             catch (PDOException $e) {
                 
@@ -194,6 +204,8 @@ class DbUtils
             }
             
         }
+        
+        
         
         return $this->con;
     }
