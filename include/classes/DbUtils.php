@@ -210,7 +210,7 @@ class DbUtils
         return $this->con;
     }
     
-    /* parse like condition is query */
+    /* parse like or not like conditions in query */
     public function like($value, $likeIndex)
     {
         $str = null;
