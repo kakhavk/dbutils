@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.5
+# Version 1.6
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
