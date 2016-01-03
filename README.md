@@ -9,7 +9,7 @@ Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Object
 require_once '../include/classes/DbUtils.php';
 ```
 
-### Simple Usage:
+### Simple Usage
 
 ```sh
 
@@ -21,14 +21,14 @@ $dbUtils->connect();
 $fetchMode=PDO::FETCH_ASSOC;
 
 ```
-Retrieve one row from table users
+Retrieve one row from table users:
 ```sh
 $row=$dbUtils->fetchRow("select * from users where id=1");
 echo $row['lname']." ".$row['fname']."\n";
 
 
 ```
-Retrieve multiple rows from table users
+Retrieve multiple rows from table users:
 ```sh
 $rows=$dbUtils->fetchRows("select * from users");
 for($i=0; $i<count($rows); $i++){
@@ -36,28 +36,28 @@ for($i=0; $i<count($rows); $i++){
 }
 
 ```
-Insert into table users
+Insert into table users:
 ```sh
 $sqlStr="insert into users (lname, fname) values ('corn', 'mc')";
 $dbUtils->insert($sqlStr, null);
 ```
-Update table users
+Update table users:
 ```sh
 $sqlStr="update users set lname='corn' where id=1";
 $dbUtils->update($sqlStr, null);
 ```
 
 
-### Advanced Usage:
-Retrieve one row from table users
+### Advanced Usage
+
+Retrieve one row from table users:
 ```sh
 $bindValue=array('name'=>'id', 'value'=>1, 'dataType'=>PDO::PARAM_INT);
 $sqlStr="select id, lname, fname, email from users where id=:id";
 $row=$dbUtils->fetchRow($sqlStr, $bindValue, $fetchMode);
 echo 'ID:'.$row['id'].' | Name: '.$row['lname'].' '.$row['fname'].(!is_null($row['email'])?' | Email: '.$row['email']:'')."\n";
 ```
-
-Retrieve multiple rows from table users
+Retrieve multiple rows from table users:
 ```sh
 $sqlStr="select * from users where lname like :lname_like and fname like :fname and lname not like :lname_not_like";
 $bindValues=array(
@@ -72,7 +72,7 @@ for($i=0; $i<count($rows); $i++){
 	echo 'ID:'.$rows[$i]['id'].' | Name: '.$rows[$i]['lname'].' '.$rows[$i]['fname'].(!is_null($rows[$i]['email'])?' | Email: '.$rows[$i]['email']:'')."\n";
 }
 ```
-Insert into table users
+Insert into table users:
 ```sh
 $sqlStr="insert into users (lname, fname, email) values (:lname, :fname, :email)";
 $bindValues=array(
@@ -84,7 +84,7 @@ $bindValues=array(
 				);
 $dbUtils->insert($sqlStr, $bindValues);				
 ```
-Update table users
+Update table users:
 ```sh
 $sqlStr="update users set lname=:lname where id=:id";
 $bindValues=array(
