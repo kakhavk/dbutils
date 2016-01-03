@@ -4,6 +4,10 @@
 # Licensed under MIT License
 # Version 1.5
 
+define('LIKE_ANY', 1);
+define('LIKE_LEFT', 2);
+define('LIKE_RIGHT', 3);
+
 class DbUtils
 {
     
@@ -301,7 +305,7 @@ class DbUtils
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
                 $bindValue = $bindValues['fields'][$i]["value"];
                 
-                if (!is_null($bindValues['fields'][$i]['like'])) {
+                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
                     $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
                 }
                 
@@ -345,30 +349,30 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        $stmt = $this->con->prepare($sqlStr);
-        
-        if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
-            for ($i = 0; $i < count($bindValues['fields']); $i++) {
-                $bindValue = $bindValues['fields'][$i]["value"];
-                
-                if (!is_null($bindValues['fields'][$i]['like'])) {
-                    $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                }
-                $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
-            }
-        } elseif (isset($bindValues['name'])) {
-            $stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
-        }
-        
-        $stmt->execute();
         
         try {
+			$stmt = $this->con->prepare($sqlStr);
+			
+			if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
+				for ($i = 0; $i < count($bindValues['fields']); $i++) {
+					$bindValue = $bindValues['fields'][$i]["value"];
+					
+					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
+						$bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+					}
+					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+				}
+			} elseif (isset($bindValues['name'])) {
+				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
+			}
+			
+			$stmt->execute();
+        
             if (false !== ($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
                 unset($stmt);
                 return $row;
             }
-        }
-        catch (PDOException $exception) {
+        }catch (PDOException $exception) {
             $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
             throw new Exception($exception->getCode() . " " . $exception->getMessage());
         }
@@ -376,11 +380,25 @@ class DbUtils
     }
     
     /* Executes query for "insert / update / delete methods" */
-    public function update($sqlStr)
+    public function update($sqlStr, $bindValues = array())
     {
         $stmt = null;
         try {
             $stmt = $this->con->prepare($sqlStr);
+            
+            if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
+            for ($i = 0; $i < count($bindValues['fields']); $i++) {
+                $bindValue = $bindValues['fields'][$i]["value"];
+                
+                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
+                    $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                }
+                $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+            }
+			} elseif (isset($bindValues['name'])) {
+				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
+			}
+            
             $stmt->execute();
         }
         catch (PDOException $pdoe) {
