@@ -271,16 +271,18 @@ class DbUtils
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
                     $bindValue = $bindValues['fields'][$i]["value"];
                     
-                    if (!is_null($bindValues['fields'][$i]['like'])) {
-                        $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                    }
-                    if (!is_null($bindValues['fields'][$i]['notLike'])) {
-                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                    }
+                    if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+
                     $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
                 }
             } elseif (isset($bindValues['name'])) {
-                $stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
+				$bindValue = $bindValues["value"];
+				
+				if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
+				if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+				
+                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
             }
         }
         $stmt->execute();
@@ -297,6 +299,56 @@ class DbUtils
         }
         return $number;
     }
+    
+    /* Fetch single sql record or null if error detected
+     * query must be full sql string
+     */
+    public function fetchRow($sqlStr, $bindValues = array(), $fetch_mode = null)
+    {
+        
+        $stmt = null;
+        $row  = array();
+        
+        $bindValue = null;
+        $fetchMode = PDO::FETCH_ASSOC;
+        if (!is_null($fetch_mode)) {
+            $fetchMode = $fetch_mode;
+        }
+        
+        
+        try {
+			$stmt = $this->con->prepare($sqlStr);
+			
+			if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
+				for ($i = 0; $i < count($bindValues['fields']); $i++) {
+					$bindValue = $bindValues['fields'][$i]["value"];
+					
+					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+					
+					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+				}
+			} elseif (isset($bindValues['name'])) {
+				$bindValue = $bindValues["value"];
+			
+				if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
+				if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+				
+				$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+			}
+			
+			$stmt->execute();
+        
+            if (false !== ($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
+                unset($stmt);
+                return $row;
+            }
+        }catch (PDOException $exception) {
+            $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
+            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+        }
+        return null;
+    }    
     
     /* Fetch sql records or null if error detected
      * query must be full sql string
@@ -327,16 +379,21 @@ class DbUtils
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
                 $bindValue = $bindValues['fields'][$i]["value"];
                 
-                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
-                    $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                }
-                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
-                    $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                }
+                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
                 
                 $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
-        }
+        }elseif(isset($bindValues['name'])) {
+        
+			$bindValue = $bindValues["value"];
+			
+			if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
+			if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+			
+			$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+		}	
+        
         if (isset($bindValues['offset']) && is_array($bindValues['offset'])) {
             for ($i = 0; $i < count($bindValues['offset']); $i++) {
                 $stmt->bindValue($bindValues['offset'][$i]['name'], $bindValues['offset'][$i]['value'], $bindValues['offset'][$i]['dataType']);
@@ -358,55 +415,6 @@ class DbUtils
         return null;
     }
     
-    
-    /* Fetch single sql record or null if error detected
-     * query must be full sql string
-     */
-    public function fetchRow($sqlStr, $bindValues = array(), $fetch_mode = null)
-    {
-        
-        $stmt = null;
-        $row  = array();
-        
-        $bindValue = null;
-        $fetchMode = PDO::FETCH_ASSOC;
-        if (!is_null($fetch_mode)) {
-            $fetchMode = $fetch_mode;
-        }
-        
-        
-        try {
-			$stmt = $this->con->prepare($sqlStr);
-			
-			if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
-				for ($i = 0; $i < count($bindValues['fields']); $i++) {
-					$bindValue = $bindValues['fields'][$i]["value"];
-					
-					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
-						$bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-					}
-					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
-                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                    }
-					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
-				}
-			} elseif (isset($bindValues['name'])) {
-				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
-			}
-			
-			$stmt->execute();
-        
-            if (false !== ($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-                unset($stmt);
-                return $row;
-            }
-        }catch (PDOException $exception) {
-            $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
-        }
-        return null;
-    }
-    
     /* Executes query for "insert / update / delete methods" */
     public function update($sqlStr, $bindValues = array())
     {
@@ -415,19 +423,24 @@ class DbUtils
             $stmt = $this->con->prepare($sqlStr);
             
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
-            for ($i = 0; $i < count($bindValues['fields']); $i++) {
-                $bindValue = $bindValues['fields'][$i]["value"];
-                
-                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
-                    $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                }
-                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
-					$bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+				for ($i = 0; $i < count($bindValues['fields']); $i++) {
+					$bindValue = $bindValues['fields'][$i]["value"];
+					
+					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
+						$bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+					}
+					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
+						$bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+					}
+					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
 				}
-                $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
-            }
 			} elseif (isset($bindValues['name'])) {
-				$stmt->bindValue($bindValues['name'], $bindValues['value'], $bindValues['dataType']);
+				$bindValue = $bindValues["value"];
+			
+				if (!is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
+				if (!is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+				
+				$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
 			}
             
             $stmt->execute();
