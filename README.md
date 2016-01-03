@@ -5,8 +5,9 @@ Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Object
 
 ### Install:
 
+```sh
 require_once '../include/classes/DbUtils.php';
-
+```
 
 ### Simple Usage:
 
