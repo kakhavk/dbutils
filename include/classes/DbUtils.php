@@ -15,40 +15,39 @@ define('NOT_LIKE_RIGHT', 3);
 class DbUtils
 {
     
-    protected $dbType='mysql'; // mysql, pgsql, mssql
+    protected $dbType = 'mysql'; // mysql, pgsql, mssql
     
     protected $attrEmulatePrepares = 0; // needed for supporting multiple queries
     protected $errorMessages = array();
     protected $isError = 0;
-    protected $options = array(
-		PDO::ATTR_TIMEOUT => 30,
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-            PDO::ATTR_EMULATE_PREPARES => 0
-    );
-    protected $dsn = null;    
-    protected $port = null;    
+    protected $options = array(PDO::ATTR_TIMEOUT => 30, PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_EMULATE_PREPARES => 0);
+    protected $dsn = null;
+    protected $port = null;
     
     private $params = array();
-    private $initializeConnect=0; //if set to 1, call method connect is not necessary
+    private $initializeConnect = 0; //if set to 1, call method connect is not necessary
     private static $con;
     
     public function __construct()
-    {	
-
+    {
+        
         $this->setDbType('mysql'); //by default database type is mysql
         $this->setDsn(null);
         
-		$params=array();        
+        $params = array();
         
-        if(defined('DBHOST')) $params['dbhost']=DBHOST;
-        if(defined('DBUSER')) $params['dbuser']=DBUSER;
-        if(defined('DBPASS')) $params['dbpass']=DBPASS;
-        if(defined('DBNAME')) $params['dbname']=DBNAME;
+        if (defined('DBHOST'))
+            $params['dbhost'] = DBHOST;
+        if (defined('DBUSER'))
+            $params['dbuser'] = DBUSER;
+        if (defined('DBPASS'))
+            $params['dbpass'] = DBPASS;
+        if (defined('DBNAME'))
+            $params['dbname'] = DBNAME;
         $this->setParams($params);
         
-        if($this->initializeConnect==1) $this->connect();
+        if ($this->initializeConnect == 1)
+            $this->connect();
         
     }
     
@@ -140,14 +139,16 @@ class DbUtils
         $this->isError = 1;
     }
     /* Get error message string */
-    public function getErrorMessage($formatted=1)
+    public function getErrorMessage($formatted = 1)
     {
-        $str   = '';
+        $str           = '';
         $errorMessages = $this->errorMessages;
         
-        for ($i = 0; $i < count($errorMessages); $i++){
-            if($formatted==1) $str .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
-            else $str .= $errorMessages[$i] ."\n";
+        for ($i = 0; $i < count($errorMessages); $i++) {
+            if ($formatted == 1)
+                $str .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
+            else
+                $str .= $errorMessages[$i] . "\n";
         }
         
         return $str;
@@ -188,22 +189,22 @@ class DbUtils
         $options = $this->options;
         
         if (!isset($this->con) || is_null($this->con)) {
-        
-				if (is_null($dsn)) {
-                    $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
-                    if ($dbType == 'mssql') {
-                        $dsn     = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
-                        $options = null;
-                    }
-                }        
-        
+            
+            if (is_null($dsn)) {
+                $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
+                if ($dbType == 'mssql') {
+                    $dsn     = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
+                    $options = null;
+                }
+            }
+            
             try {
                 
                 
                 $this->con = new PDO($dsn, $user, $pass, $options);
                 if ($dbType == "mysql" && $this->con) {
-				   $this->con->prepare("SET NAMES 'utf8'")->execute();
-				}
+                    $this->con->prepare("SET NAMES 'utf8'")->execute();
+                }
             }
             catch (PDOException $e) {
                 
@@ -233,7 +234,7 @@ class DbUtils
         return $str;
     }
     
-
+    
     /* parse not like conditions in query */
     public function notLike($value, $notLikeIndex)
     {
@@ -271,17 +272,21 @@ class DbUtils
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
                     $bindValue = $bindValues['fields'][$i]["value"];
                     
-                    if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-
+                    if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
+                        $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                    
                     $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
                 }
             } elseif (isset($bindValues['name'])) {
-				$bindValue = $bindValues["value"];
-				
-				if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
-				if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
-				
+                $bindValue = $bindValues["value"];
+                
+                if (isset($bindValues['like']) && !is_null($bindValues['like']))
+                    $bindValue = $this->like($bindValue, $bindValues['like']);
+                if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                    $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+                
                 $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
             }
         }
@@ -317,38 +322,43 @@ class DbUtils
         
         
         try {
-			$stmt = $this->con->prepare($sqlStr);
-			
-			if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
-				for ($i = 0; $i < count($bindValues['fields']); $i++) {
-					$bindValue = $bindValues['fields'][$i]["value"];
-					
-					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-					
-					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
-				}
-			} elseif (isset($bindValues['name'])) {
-				$bindValue = $bindValues["value"];
-			
-				if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
-				if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
-				
-				$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
-			}
-			
-			$stmt->execute();
-        
+            $stmt = $this->con->prepare($sqlStr);
+            
+            if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
+                for ($i = 0; $i < count($bindValues['fields']); $i++) {
+                    $bindValue = $bindValues['fields'][$i]["value"];
+                    
+                    if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
+                        $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                    
+                    $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+                }
+            } elseif (isset($bindValues['name'])) {
+                $bindValue = $bindValues["value"];
+                
+                if (isset($bindValues['like']) && !is_null($bindValues['like']))
+                    $bindValue = $this->like($bindValue, $bindValues['like']);
+                if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                    $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+                
+                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+            }
+            
+            $stmt->execute();
+            
             if (false !== ($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
                 unset($stmt);
                 return $row;
             }
-        }catch (PDOException $exception) {
+        }
+        catch (PDOException $exception) {
             $this->addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
             throw new Exception($exception->getCode() . " " . $exception->getMessage());
         }
         return null;
-    }    
+    }
     
     /* Fetch sql records or null if error detected
      * query must be full sql string
@@ -379,20 +389,24 @@ class DbUtils
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
                 $bindValue = $bindValues['fields'][$i]["value"];
                 
-                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
+                    $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                    $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
                 
                 $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
-        }elseif(isset($bindValues['name'])) {
-        
-			$bindValue = $bindValues["value"];
-			
-			if (isset($bindValues['like']) && !is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
-			if (isset($bindValues['notLike']) && !is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
-			
-			$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
-		}	
+        } elseif (isset($bindValues['name'])) {
+            
+            $bindValue = $bindValues["value"];
+            
+            if (isset($bindValues['like']) && !is_null($bindValues['like']))
+                $bindValue = $this->like($bindValue, $bindValues['like']);
+            if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+            
+            $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+        }
         
         if (isset($bindValues['offset']) && is_array($bindValues['offset'])) {
             for ($i = 0; $i < count($bindValues['offset']); $i++) {
@@ -423,37 +437,39 @@ class DbUtils
             $stmt = $this->con->prepare($sqlStr);
             
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
-				for ($i = 0; $i < count($bindValues['fields']); $i++) {
-					$bindValue = $bindValues['fields'][$i]["value"];
-					
-					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
-						$bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
-					}
-					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
-						$bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-					}
-					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
-				}
-			} elseif (isset($bindValues['name'])) {
-				$bindValue = $bindValues["value"];
-			
-				if (!is_null($bindValues['like'])) $bindValue = $this->like($bindValue, $bindValues['like']);
-				if (!is_null($bindValues['notLike'])) $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
-				
-				$stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
-			}
+                for ($i = 0; $i < count($bindValues['fields']); $i++) {
+                    $bindValue = $bindValues['fields'][$i]["value"];
+                    
+                    if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
+                        $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                    }
+                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
+                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                    }
+                    $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+                }
+            } elseif (isset($bindValues['name'])) {
+                $bindValue = $bindValues["value"];
+                
+                if (!is_null($bindValues['like']))
+                    $bindValue = $this->like($bindValue, $bindValues['like']);
+                if (!is_null($bindValues['notLike']))
+                    $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
+                
+                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+            }
             
             $stmt->execute();
         }
         catch (PDOException $pdoe) {
-            $this->addErrorMessage("Error insert or updating table:\n".$sqlStr."\n".$pdoe->getMessage());
+            $this->addErrorMessage("Error insert or updating table:\n" . $sqlStr . "\n" . $pdoe->getMessage());
             $this->setIsError(1);
         }
         return $stmt;
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    public function insert($sqlStr, $bindValues=array())
+    public function insert($sqlStr, $bindValues = array())
     {
         $ret = $this->update($sqlStr, $bindValues);
         if ($this->getDbType() == "mysql")
