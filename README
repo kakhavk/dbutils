@@ -6,7 +6,6 @@ Access and Manage MySQL, PostgreSQL, MicrosoftSQL database using PHP Data Object
 Simple Usage:
 
 
-
 require_once '../include/classes/DbUtils.php';
 $dbUtils=new DbUtils();
 $dbUtils->setDbType('mysql');
