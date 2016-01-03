@@ -8,6 +8,10 @@ define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
 define('LIKE_RIGHT', 3);
 
+define('NOT_LIKE_ANY', 1);
+define('NOT_LIKE_LEFT', 2);
+define('NOT_LIKE_RIGHT', 3);
+
 class DbUtils
 {
     
@@ -214,7 +218,7 @@ class DbUtils
         return $this->con;
     }
     
-    /* parse like or not like conditions in query */
+    /* parse like conditions in query */
     public function like($value, $likeIndex)
     {
         $str = null;
@@ -229,6 +233,21 @@ class DbUtils
         return $str;
     }
     
+
+    /* parse not like conditions in query */
+    public function notLike($value, $notLikeIndex)
+    {
+        $str = null;
+        if (!is_null($notLikeIndex) && $notLikeIndex != 0) {
+            if ($notLikeIndex == 1)
+                $str = '%' . $value . '%'; // like is any
+            elseif ($notLikeIndex == 2)
+                $str = $value . '%'; // like is left
+            elseif ($notLikeIndex == 3)
+                $str = '%' . $value; // like is right
+        }
+        return $str;
+    }
     
     /* Return number value from sql like "COUNT, SUM" and other similar methods which returns one number value
      * query must be full sql string and must return one value.
@@ -254,6 +273,9 @@ class DbUtils
                     
                     if (!is_null($bindValues['fields'][$i]['like'])) {
                         $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
+                    }
+                    if (!is_null($bindValues['fields'][$i]['notLike'])) {
+                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
                     }
                     $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
                 }
@@ -308,6 +330,9 @@ class DbUtils
                 if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
                     $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
                 }
+                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
+                    $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                }
                 
                 $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
@@ -360,6 +385,9 @@ class DbUtils
 					if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
 						$bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
 					}
+					if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
+                        $bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                    }
 					$stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
 				}
 			} elseif (isset($bindValues['name'])) {
@@ -393,6 +421,9 @@ class DbUtils
                 if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like'])) {
                     $bindValue = $this->like($bindValue, $bindValues['fields'][$i]['like']);
                 }
+                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike'])) {
+					$bindValue = $this->notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+				}
                 $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
 			} elseif (isset($bindValues['name'])) {
@@ -402,16 +433,16 @@ class DbUtils
             $stmt->execute();
         }
         catch (PDOException $pdoe) {
-            $this->addErrorMessage($pdoe->getMessage());
+            $this->addErrorMessage("Error insert or updating table:\n".$sqlStr."\n".$pdoe->getMessage());
             $this->setIsError(1);
         }
         return $stmt;
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    public function insert($sqlStr)
+    public function insert($sqlStr, $bindValues=array())
     {
-        $ret = $this->update($sqlStr);
+        $ret = $this->update($sqlStr, $bindValues);
         if ($this->getDbType() == "mysql")
             return $this->con->lastInsertId();
         return $ret;
