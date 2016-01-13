@@ -585,10 +585,10 @@ class DbUtils
     /* Returns string or null
      * Since 0.10
      */
-    public function strNull($str)
+    public function strNull($str, $addslashes=0)
     {
         if (!is_null($str) && $str !== "") {
-            if (!get_magic_quotes_gpc()) {
+            if ($addslashes==0) {
                 $str = addslashes($str);
             }
             return trim("'" . $str . "'");
