@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.6
+# Version 1.7
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -24,7 +24,10 @@ class DbUtils
     protected $dsn = null;
     protected $port = null;
     
-    private $params = array();
+    private $params = array(
+		'dateFrom'=>null,
+		'dateTo'=>null
+    );
     private $initializeConnect = 0; //if set to 1, call method connect is not necessary
     private static $con;
     
@@ -77,7 +80,7 @@ class DbUtils
     }
     
     
-    /* Set Host for database */
+    /* Set parameters values */
     public function setParams($params = array())
     {
         if (is_array($params)) {
@@ -86,7 +89,10 @@ class DbUtils
         }
     }
     
-    
+    /* Set parameter value */
+    private function setParam($key, $value){
+		if(!empty($key)) $this->params[$key]=$valuel;
+    }
     
     /* Get ATTR_EMULATE_PREPARES for connection */
     public function getAttrEmulatePrepares()
@@ -646,6 +652,28 @@ class DbUtils
         }
         return $attr;
     }
+    
+    /* Parse date and convert it's format, or return null if is not set properly */
+	function convertDate($date){
+		$dateFrom='dd/mm/yyyy';
+		$dateTo='yyyy/mm/dd';
+		$dateExplode=array();
+		$parsedDate=null;
+		
+		if(!is_null($this->params['dateFrom'])) $dateFrom=$this->params['dateFrom'];
+		if(!is_null($this->params['dateTo'])) $dateTo=$this->params['dateTo'];
+		
+		
+		if(!empty($date)){
+			if($dateFrom=='dd/mm/yyyy')	$dateExplode=explode('/', $dateFrom);
+			if(count($dateExplode)==3){
+				if($dateTo=='yyyy/mm/dd') $parsedDate=$dateExplode[2].'/'.$dateExplode[1].'/'.$dateExplode[0];
+			}
+			if(!is_null($parsedDate)) return $parsedDate;
+		}
+		
+		return "NULL";
+	}    
     
     
 }
