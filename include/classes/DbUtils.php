@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.7
+# Version 1.8
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -665,7 +665,7 @@ class DbUtils
 		
 		
 		if(!empty($date)){
-			if($dateFrom=='dd/mm/yyyy')	$dateExplode=explode('/', $dateFrom);
+			if($dateFrom=='dd/mm/yyyy')	$dateExplode=explode('/', $date);
 			if(count($dateExplode)==3){
 				if($dateTo=='yyyy/mm/dd') $parsedDate=$dateExplode[2].'/'.$dateExplode[1].'/'.$dateExplode[0];
 			}
