@@ -15,8 +15,6 @@ require_once '../include/classes/DbUtils.php';
 
 
 $dbUtils=new DbUtils();
-$dbUtils->setDbType('mysql');
-$dbUtils->connect();
 
 $fetchMode=PDO::FETCH_ASSOC;
 

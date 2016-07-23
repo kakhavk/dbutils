@@ -12,8 +12,6 @@ Simple Usage
 
 
 $dbUtils=new DbUtils();
-$dbUtils->setDbType('mysql');
-$dbUtils->connect();
 
 $fetchMode=PDO::FETCH_ASSOC;
 
