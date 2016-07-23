@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.8
+# Version 1.9
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -12,10 +12,9 @@ define('NOT_LIKE_ANY', 1);
 define('NOT_LIKE_LEFT', 2);
 define('NOT_LIKE_RIGHT', 3);
 
-class DbUtils
-{
+class DbUtils extends PDO{
     
-    protected $dbType = 'mysql'; // mysql, pgsql, mssql
+    protected $dbType = 'mysql'; // by default set to mysql. can be changed to mysql, pgsql, mssql ...
     
     protected $attrEmulatePrepares = 0; // needed for supporting multiple queries
     protected $errorMessages = array();
@@ -24,34 +23,38 @@ class DbUtils
     protected $dsn = null;
     protected $port = null;
     
-    private $params = array(
+    private static $params = array(
 		'dateFrom'=>null,
 		'dateTo'=>null
     );
-    private $initializeConnect = 0; //if set to 1, call method connect is not necessary
-    private static $con;
-    
-    public function __construct()
+
+    public function __construct($dbType=null)
     {
+        if(!empty($dbType))  $this->setDbType($dbType);       
+
+		$this->constructConfiguration();
+		parent::__construct($this->dsn, DBUSER, DBPASS, $this->options);
+		if ($this->dbType == "mysql") {
+			parent::prepare("SET NAMES 'utf8'")->execute();
+		}        
+    }
         
-        $this->setDbType('mysql'); //by default database type is mysql
-        $this->setDsn(null);
+    /* make construct */
+    function constructConfiguration(){
+       $dbType = $this->getDbType();
         
-        $params = array();
+        $host   = DBHOST;
+        $dbname = DBNAME;
         
-        if (defined('DBHOST'))
-            $params['dbhost'] = DBHOST;
-        if (defined('DBUSER'))
-            $params['dbuser'] = DBUSER;
-        if (defined('DBPASS'))
-            $params['dbpass'] = DBPASS;
-        if (defined('DBNAME'))
-            $params['dbname'] = DBNAME;
-        $this->setParams($params);
-        
-        if ($this->initializeConnect == 1)
-            $this->connect();
-        
+        $port = null;
+        $dsn  = null;
+        if (!is_null($this->port) && trim($this->port !== '')) $port = $this->port;
+        if (is_null($this->dsn)){
+			$this->dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
+			if ($dbType == 'mssql') {
+				$this->dsn    = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
+			}
+		}        
     }
     
     /* Sets Database Type: mysql or pgsql */
@@ -72,7 +75,8 @@ class DbUtils
     public function getDbType()
     {
         return $this->dbType;
-    }
+    }     
+    
     /* Set ATTR_EMULATE_PREPARES for connection */
     public function setAttrEmulatePrepares($value)
     {
@@ -173,60 +177,8 @@ class DbUtils
     }
     
     
-    /* Create connection */
-    public function connect()
-    {
-        
-        
-        $dbType = $this->getDbType();
-        
-        $host   = $this->params['dbhost'];
-        $user   = $this->params['dbuser'];
-        $pass   = $this->params['dbpass'];
-        $dbname = $this->params['dbname'];
-        
-        $port = null;
-        $dsn  = null;
-        if (!is_null($this->port) && trim($this->port !== ''))
-            $port = $this->port;
-        if (!is_null($this->dsn))
-            $dsn = $this->dsn;
-        
-        $options = $this->options;
-        
-        if (!isset($this->con) || is_null($this->con)) {
-            
-            if (is_null($dsn)) {
-                $dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
-                if ($dbType == 'mssql') {
-                    $dsn     = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
-                    $options = null;
-                }
-            }
-            
-            try {
-                
-                
-                $this->con = new PDO($dsn, $user, $pass, $options);
-                if ($dbType == "mysql" && $this->con) {
-                    $this->con->prepare("SET NAMES 'utf8'")->execute();
-                }
-            }
-            catch (PDOException $e) {
-                
-                $this->addErrorMessage("Problem connecting to database: " . $e->getMessage());
-                return false;
-            }
-            
-        }
-        
-        
-        
-        return $this->con;
-    }
-    
     /* parse like conditions in query */
-    public function like($value, $likeIndex)
+    protected function like($value, $likeIndex)
     {
         $str = null;
         if (!is_null($likeIndex) && $likeIndex != 0) {
@@ -242,7 +194,7 @@ class DbUtils
     
     
     /* parse not like conditions in query */
-    public function notLike($value, $notLikeIndex)
+    protected function notLike($value, $notLikeIndex)
     {
         $str = null;
         if (!is_null($notLikeIndex) && $notLikeIndex != 0) {
@@ -272,7 +224,7 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        $stmt = $this->con->prepare($sqlStr);
+        $stmt = parent::prepare($sqlStr);
         if (isset($bindValues) && is_array($bindValues)) {
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
@@ -326,9 +278,8 @@ class DbUtils
             $fetchMode = $fetch_mode;
         }
         
-        
         try {
-            $stmt = $this->con->prepare($sqlStr);
+            $stmt = parent::prepare($sqlStr);
             
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
@@ -389,7 +340,7 @@ class DbUtils
         }
         
         
-        $stmt = $this->con->prepare($sqlStr);
+        $stmt = parent::prepare($sqlStr);
         
         if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
             for ($i = 0; $i < count($bindValues['fields']); $i++) {
@@ -440,9 +391,9 @@ class DbUtils
     {
         $stmt = null;
         try {
-            $stmt = $this->con->prepare($sqlStr);
+            $stmt = parent::prepare($sqlStr);
             
-            if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
+            if (!empty($bindValues['fields']) && is_array($bindValues['fields'])) {
                 for ($i = 0; $i < count($bindValues['fields']); $i++) {
                     $bindValue = $bindValues['fields'][$i]["value"];
                     
@@ -457,9 +408,9 @@ class DbUtils
             } elseif (isset($bindValues['name'])) {
                 $bindValue = $bindValues["value"];
                 
-                if (!is_null($bindValues['like']))
+                if (!empty($bindValues['like']))
                     $bindValue = $this->like($bindValue, $bindValues['like']);
-                if (!is_null($bindValues['notLike']))
+                if (!empty($bindValues['notLike']))
                     $bindValue = $this->notLike($bindValue, $bindValues['notLike']);
                 
                 $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
@@ -479,14 +430,14 @@ class DbUtils
     {
         $ret = $this->update($sqlStr, $bindValues);
         if ($this->getDbType() == "mysql")
-            return $this->con->lastInsertId();
+            return parent::lastInsertId();
         return $ret;
     }
     
     /* Unset connection object */
     public function close()
     {
-        $this->con = null;
+        $this->object = null;
     }
     /* get next sequence value
      * Since 0.10
@@ -500,7 +451,7 @@ class DbUtils
         
         if ($dbType == 'pgsql') {
             $sqlStr = "SELECT nextval('" . $sequence . "')";
-            $ret    = $this->con->query($sqlStr)->fetch(PDO::FETCH_NUM);
+            $ret    = parent::query($sqlStr)->fetch(PDO::FETCH_NUM);
             $seqId  = $ret[0];
         }
         
@@ -515,7 +466,7 @@ class DbUtils
         $sqlStr = '';
         
         if ($this->getDbType() == 'mysql') {
-            $lastId = $this->con->lastInsertId();
+            $lastId = parent::lastInsertId();
         }
         
         return $lastId;
@@ -524,19 +475,19 @@ class DbUtils
     /* Start transaction */
     public function beginTransaction()
     {
-        $this->con->beginTransaction();
+        parent::beginTransaction();
     }
     
     /* Rollback transaction */
     public function rollback()
     {
-        $this->con->rollBack();
+        parent::rollBack();
     }
     
     /* Commit transaction */
     public function commit()
     {
-        $this->con->commit();
+        parent::commit();
     }
     
     /* Checks if row is array and has records */
@@ -623,7 +574,7 @@ class DbUtils
     }
     
     /* Returns connection attributes*/
-    public function connectionAttributes($attributeName = "")
+    public function connectionAttributes($attributeName)
     {
         $attr = "";
         
@@ -642,12 +593,12 @@ class DbUtils
             //"Timeout"=>"TIMEOUT"
         );
         
-        if (isset($attributeName) && !is_null($attributeName) && trim($attributeName) !== "") {
-            $attr = $this->con->getAttribute(constant("PDO::ATTR_$attributeName"));
+        if (!empty($attributeName)) {
+            $attr = parent::getAttribute(constant("PDO::ATTR_$attributeName"));
         } else {
             foreach ($pdoAttributes as $k => $v) {
-                if (null !== ($this->con->getAttribute(constant("PDO::ATTR_$v"))))
-                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . $this->con->getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
+                if (null !== (parent::getAttribute(constant("PDO::ATTR_$v"))))
+                    $attr .= '<div><span style="color:navy;">' . $k . '</span>:' . parent::getAttribute(constant('PDO::ATTR_' . $v)) . '</div>';
             }
         }
         return $attr;

@@ -1,0 +1,5 @@
+1.9 version changes
+-----------------------------
+* Removed connect function and con identifier instead class extends PDO and uses parent method directly
+* Optimised code
+* Bug fixes

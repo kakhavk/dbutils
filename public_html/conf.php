@@ -1,8 +1,9 @@
 <?php
 
-define('DBHOST','hostname');
-define('DBUSER','username');
-define('DBPASS','password');
-define('DBNAME','database');
+define('DBHOST','localhost');
+define('DBUSER','testuser');
+define('DBPASS','test123');
+define('DBNAME','test');
 
+$title="Test";
 ?>

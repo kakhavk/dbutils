@@ -3,8 +3,11 @@
 # Writen By Kakhaber Kashmadze <info@soft.ge> 
 
 #for this example use test-mysql.sql from folder ../sql/
+
+
 require_once 'conf.php';
 require_once '../include/classes/DbUtils.php';
+
 
 $dbUtils=new DbUtils();
 
@@ -12,7 +15,7 @@ $dbUtils=new DbUtils();
 /*	$dbUtils->setParams(array('dbhost'=>'localhost','dbuser'=>'username','dbpass'=>'password','dbname'=>'database'));
 */
 
-$dbUtils->connect();
+
 
 $fetchMode=PDO::FETCH_ASSOC;
 
