@@ -100,7 +100,7 @@ echo $dbUtils->getErrorMessage(0);
 Format date:
 ```sh
 $params=array(
-	'dateFrom'=>'dd/mm/yyyy',
+	'dateFrom'=>'dd-mm-yyyy',
 	'dateTo'=>'yyyy/mm/dd'
 );
 
