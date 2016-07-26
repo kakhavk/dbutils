@@ -3,3 +3,7 @@
 * Removed connect function and con identifier instead class extends PDO and uses parent method directly
 * Optimised code
 * Bug fixes
+
+2.0
+
+* added function formatDate with more flexibility, it can suggest separator from parameters, format and change from one format to another

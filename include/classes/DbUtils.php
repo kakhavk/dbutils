@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.9
+# Version 2.0
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -23,11 +23,11 @@ class DbUtils extends PDO{
     protected $dsn = null;
     protected $port = null;
     
-    private static $params = array(
-		'dateFrom'=>null,
-		'dateTo'=>null
+    private $params=array(
+		'dateFrom'=>'dd/mm/yyyy',
+		'dateTo'=>'yyyy/mm/dd'
     );
-
+    
     public function __construct($dbType=null)
     {
         if(!empty($dbType))  $this->setDbType($dbType);       
@@ -84,20 +84,6 @@ class DbUtils extends PDO{
     }
     
     
-    /* Set parameters values */
-    public function setParams($params = array())
-    {
-        if (is_array($params)) {
-            foreach ($params as $k => $v)
-                $this->params[$k] = $v;
-        }
-    }
-    
-    /* Set parameter value */
-    private function setParam($key, $value){
-		if(!empty($key)) $this->params[$key]=$valuel;
-    }
-    
     /* Get ATTR_EMULATE_PREPARES for connection */
     public function getAttrEmulatePrepares()
     {
@@ -131,11 +117,34 @@ class DbUtils extends PDO{
         return $this->options;
     }
     
+	/* Set or change parameter value */
+    public function setParam($key, $value){
+		if(!empty($key)) $this->params[$key]=$valuel;
+    }
+    
+    /* Set or change parameter values */
+    public function setParams($params){
+		foreach($params as $key => $value){
+			if(!empty($key)) $this->params[$key]=$value;
+		}
+    }   
+    
+    /* Retrieve parameters */ 
+    public function getParams(){
+		return $this->params;
+    }
+    
+    /* Retrieve parameters */ 
+    public function getParam($key){
+		return $this->params[$key];
+    }        
+    
     /* Set port for connection */
     public function setPort($value)
     {
         $this->port = $value;
     }
+    
     /* Get port for connection */
     public function getPort()
     {
@@ -604,27 +613,80 @@ class DbUtils extends PDO{
         return $attr;
     }
     
-    /* Parse date and convert it's format, or return null if is not set properly */
-	function convertDate($date){
-		$dateFrom='dd/mm/yyyy';
-		$dateTo='yyyy/mm/dd';
+    /**
+    * Parse date and change format, or return null if is not set properly 
+    * $date must with yyyy format for year and not yy, month and day must with two simbol format : dd/mm/yyyy,
+    * default parameters is set to $params array with dateFrom and dateTo formats
+    * @return format date    
+    */
+	function formatDate($date){
+
+		$dateFrom=array();
+		$dateTo=array();
+
+		$dateFromSeparator=null;
+		$dateToSeparator=null;
+		
+		$dateFrom2=array();
+		$dateTo2=array();
+		
 		$dateExplode=array();
 		$parsedDate=null;
 		
-		if(!is_null($this->params['dateFrom'])) $dateFrom=$this->params['dateFrom'];
-		if(!is_null($this->params['dateTo'])) $dateTo=$this->params['dateTo'];
-		
-		
-		if(!empty($date)){
-			if($dateFrom=='dd/mm/yyyy')	$dateExplode=explode('/', $date);
-			if(count($dateExplode)==3){
-				if($dateTo=='yyyy/mm/dd') $parsedDate=$dateExplode[2].'/'.$dateExplode[1].'/'.$dateExplode[0];
+		$tmpArray=array();
+		$tmpInt=null;
+
+		if(!empty($this->params['dateFrom']) && trim($this->params['dateFrom'])!==''){	
+			$dateFromSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', $this->params['dateFrom']))),0, 1);
+			$dateFrom=array();
+			$tmpArray=explode($dateFromSeparator, $this->params['dateFrom']);
+			for($i=0; $i<count($tmpArray); $i++){
+				 $dateFrom[$i]=$tmpArray[$i];
 			}
-			if(!is_null($parsedDate)) return $parsedDate;
+		}
+
+
+		if(!empty($this->params['dateTo']) && trim($this->params['dateTo'])!==''){
+			$dateToSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', $this->params['dateTo']))),0, 1);
+			$dateTo=array();
+			$tmpArray=explode($dateToSeparator, $this->params['dateTo']);
+			foreach($tmpArray as $key => $value){
+				 $dateTo[$key]=$value;
+			}			
 		}
 		
-		return "NULL";
-	}    
+		foreach($dateTo as $key => $value){
+			$dateTo2[$value]=null;
+		}		
+		
+
+		if(!empty($date) && trim($date)!==''){
+			$dateExplode=explode($dateFromSeparator, $date);
+			if(count($dateExplode)==3){
+
+				for($i=0; $i<3; $i++){
+					$tmpInt=$dateFrom[$i];
+					$dateFrom2[$tmpInt]=$dateExplode[$i];
+				}
+
+				foreach($dateFrom2 as $key => $value){
+					$dateTo2[$key]=$value;
+				}
+				
+				$parsedDate='';
+				$i=0;
+				foreach($dateTo2 as $key => $value){
+					if($i!=0) $parsedDate.=$dateToSeparator;
+					$parsedDate.=$dateTo2[$key];
+					$i++;
+				}
+				
+			}
+			if(!empty($parsedDate) && trim($parsedDate)!=='') return $parsedDate;
+		}
+		
+		return NULL;
+	}
     
     
 }
