@@ -96,3 +96,29 @@ $dbUtils->update($sqlStr, $bindValues);
 
 echo $dbUtils->getErrorMessage(0);
 ```
+
+Format date:
+```sh
+$params=array(
+	'dateFrom'=>'dd/mm/yyyy',
+	'dateTo'=>'yyyy/mm/dd'
+);
+
+$date='22-07-2016';
+
+echo $dbUtils->formatDate($date);
+
+```
+
+
+Check empty value (Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tabs):
+```sh
+$value=" ";
+
+isEmpty($value); /* Returns true */
+empty($value); /* Returns false */
+
+var_dump(isEmpty($value));
+var_dump(empty($value));
+
+```

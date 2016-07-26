@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 2.0
+# Version 2.1
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -689,6 +689,12 @@ class DbUtils extends PDO{
 	}
     
     
+}
+
+/* Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tabs */
+private function isEmpty($value){
+	if(!isset($value) || empty($value) || trim($value)=='') return true;
+	return false;
 }
 
 ?>

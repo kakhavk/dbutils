@@ -1,9 +1,14 @@
-1.9 version changes
------------------------------
+Version 2.1
+* added function isEmpty(). Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tab.
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+Version 2.0
+
+* added function formatDate with more flexibility, it can suggest separator from parameters, format and change from one format to another
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+Version 1.9
+
 * Removed connect function and con identifier instead class extends PDO and uses parent method directly
 * Optimised code
 * Bug fixes
-
-2.0
-
-* added function formatDate with more flexibility, it can suggest separator from parameters, format and change from one format to another
