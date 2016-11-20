@@ -692,7 +692,7 @@ class DbUtils extends PDO{
 }
 
 /* Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tabs */
-private function isEmpty($value){
+function isEmpty($value){
 	if(!isset($value) || empty($value) || trim($value)=='') return true;
 	return false;
 }
