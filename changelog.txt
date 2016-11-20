@@ -1,3 +1,9 @@
+Version 2.2
+* fixed getDsn function
+* enhanced formatDate function
+
+* also added separate functions.php file with alternative functions of php: empty and var_dump.
+
 Version 2.1
 * added function isEmpty(). Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tab.
 

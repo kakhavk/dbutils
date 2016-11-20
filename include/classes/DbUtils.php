@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 2.1
+# Version 2.2
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -11,6 +11,8 @@ define('LIKE_RIGHT', 3);
 define('NOT_LIKE_ANY', 1);
 define('NOT_LIKE_LEFT', 2);
 define('NOT_LIKE_RIGHT', 3);
+
+
 
 class DbUtils extends PDO{
     
@@ -22,6 +24,8 @@ class DbUtils extends PDO{
     protected $options = array(PDO::ATTR_TIMEOUT => 30, PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_EMULATE_PREPARES => 0);
     protected $dsn = null;
     protected $port = null;
+    public $endLine="<br />";
+    
     
     private $params=array(
 		'dateFrom'=>'dd/mm/yyyy',
@@ -31,7 +35,8 @@ class DbUtils extends PDO{
     public function __construct($dbType=null)
     {
         if(!empty($dbType))  $this->setDbType($dbType);       
-
+		if(empty($_SERVER['HTTP_HOST'])) $this->endLine="\n";
+		
 		$this->constructConfiguration();
 		parent::__construct($this->dsn, DBUSER, DBPASS, $this->options);
 		if ($this->dbType == "mysql") {
@@ -119,7 +124,7 @@ class DbUtils extends PDO{
     
 	/* Set or change parameter value */
     public function setParam($key, $value){
-		if(!empty($key)) $this->params[$key]=$valuel;
+		if(!empty($key)) $this->params[$key]=$value;
     }
     
     /* Set or change parameter values */
@@ -523,27 +528,26 @@ class DbUtils extends PDO{
      * insert into table (id, active) values (12, retBooleanCondition(1));
      * where active is boolean type field inserts in mysql 1 and postgresql true
      */
-    public function booleanCondition($value)
-    {
-        $retStr   = "";
-        $dbType   = $this->getDbType();
-        $valueStr = trim($value);
+    function setBoolean($value=null){
+        $retStr="";
+        $dbType=$this->retDbType();
         
-        if ($dbType == "mysql") {
-            if ($valueStr == "false" || $valueStr == "f")
-                $retStr = "0";
-            elseif ($valueStr == "true" || $valueStr == "t")
-                $retStr = "1";
-            else
-                $retStr = $valueStr;
-        } elseif ($dbType == "pgsql") {
-            if ($valueStr == 0)
-                $retStr = "false";
-            elseif ($valueStr == 1)
-                $retStr = "true";
-            else
-                $retStr = $valueStr;
-        }
+        if(!HiUtils::isEmpty($value)){
+			
+			if($dbType=="mysql"){
+				if($value=="false" || $value=="f") $retStr="0";
+				elseif($value=="true" || $value=="t") $retStr="1";            
+				else $retStr=$value;
+			 }elseif($dbType=="pgsql"){
+				if((is_bool($value) && $value===false) || $value==0) $retStr="false";
+				elseif((is_bool($value) && $value===true) || $value==1) $retStr="true";
+				else $retStr=$value;
+			 }
+		}else{
+			if($dbType=="mysql") $retStr="0"; 
+			elseif($dbType=="pgsql") $retStr="false";
+		}
+        
         
         return $retStr;
     }
@@ -617,7 +621,15 @@ class DbUtils extends PDO{
     * Parse date and change format, or return null if is not set properly 
     * $date must with yyyy format for year and not yy, month and day must with two simbol format : dd/mm/yyyy,
     * default parameters is set to $params array with dateFrom and dateTo formats
-    * @return format date    
+    * @return format date 
+	* default values in params:
+	*	'dateFrom'='dd/mm/yyyy'
+	*	'dateTo'='yyyy/mm/dd'
+	*	'dateFromSeparator'='/'
+	*	'dateToSeparator'='/'
+	* Custom usage:
+	* setParam('dateFrom','yyyy-mm-dd');
+	* setParam('dateTo','mm/yyyy/dd');
     */
 	function formatDate($date){
 
@@ -636,13 +648,17 @@ class DbUtils extends PDO{
 		$tmpArray=array();
 		$tmpInt=null;
 
-		if(!empty($this->params['dateFrom']) && trim($this->params['dateFrom'])!==''){	
+		if(!empty($this->params['dateFrom']) && trim($this->params['dateFrom'])!==''){
+			
 			$dateFromSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', $this->params['dateFrom']))),0, 1);
 			$dateFrom=array();
 			$tmpArray=explode($dateFromSeparator, $this->params['dateFrom']);
+
 			for($i=0; $i<count($tmpArray); $i++){
+				echo $tmpArray[$i].$this->endLine;
 				 $dateFrom[$i]=$tmpArray[$i];
 			}
+
 		}
 
 
@@ -650,9 +666,10 @@ class DbUtils extends PDO{
 			$dateToSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', $this->params['dateTo']))),0, 1);
 			$dateTo=array();
 			$tmpArray=explode($dateToSeparator, $this->params['dateTo']);
+			
 			foreach($tmpArray as $key => $value){
 				 $dateTo[$key]=$value;
-			}			
+			}
 		}
 		
 		foreach($dateTo as $key => $value){
@@ -661,9 +678,10 @@ class DbUtils extends PDO{
 		
 
 		if(!empty($date) && trim($date)!==''){
+			
 			$dateExplode=explode($dateFromSeparator, $date);
 			if(count($dateExplode)==3){
-
+				
 				for($i=0; $i<3; $i++){
 					$tmpInt=$dateFrom[$i];
 					$dateFrom2[$tmpInt]=$dateExplode[$i];
@@ -682,19 +700,11 @@ class DbUtils extends PDO{
 				}
 				
 			}
-			if(!empty($parsedDate) && trim($parsedDate)!=='') return $parsedDate;
+			if(!empty($parsedDate) && trim($parsedDate)!=='') $date=$parsedDate;
 		}
 		
-		return NULL;
+		return $date;
 	}
     
-    
 }
-
-/* Unlike standart empty function isEmpty also assigns true if value contains whitespaces, newlines, tabs */
-function isEmpty($value){
-	if(!isset($value) || empty($value) || trim($value)=='') return true;
-	return false;
-}
-
 ?>
