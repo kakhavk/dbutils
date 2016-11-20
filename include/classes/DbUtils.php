@@ -99,7 +99,7 @@ class DbUtils extends PDO{
     /* Get connection dsn */
     public function getDsn()
     {
-        return $this->options;
+        return $this->dsn;
     }
     
     /* Set connectin options */
