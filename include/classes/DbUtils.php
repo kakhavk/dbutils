@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 2.2
+# Version 2.2.1
 
 define('LIKE_ANY', 1);
 define('LIKE_LEFT', 2);
@@ -57,6 +57,7 @@ class DbUtils extends PDO{
         if (is_null($this->dsn)){
 			$this->dsn = $dbType . ':host=' . $host . (!is_null($port) ? ';port=' . $port : '') . ';dbname=' . $dbname;
 			if ($dbType == 'mssql') {
+				$this->options=null;
 				$this->dsn    = 'dblib:host=' . $host . (!is_null($port) ? ':' . $port : '') . ';dbname=' . $dbname;
 			}
 		}        

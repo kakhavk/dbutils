@@ -12,6 +12,8 @@ Simple Usage
 
 
 $dbUtils=new DbUtils();
+// For Microsoft SQL Server use
+$dbUtils=new DbUtils('mssql');
 
 $fetchMode=PDO::FETCH_ASSOC;
 

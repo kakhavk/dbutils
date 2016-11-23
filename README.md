@@ -16,7 +16,13 @@ require_once '../include/classes/DbUtils.php';
 
 $dbUtils=new DbUtils();
 
+// For Microsoft SQL Server use
+$dbUtils=new DbUtils('mssql');
+
+
 $fetchMode=PDO::FETCH_ASSOC;
+
+
 
 ```
 Retrieve one row from table users:
