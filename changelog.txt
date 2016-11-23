@@ -1,3 +1,5 @@
+Version 2.2.1
+* fixed Microsoft SQL server support
 Version 2.2
 * fixed getDsn function
 * enhanced formatDate function
