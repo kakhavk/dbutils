@@ -8,6 +8,10 @@
 require_once 'conf.php';
 require_once '../include/classes/DbUtils.php';
 
+/* By default database type is MySQL: 'mysql'
+* To change database type add database type  argument shortly : for PostgreSQL 'pgsql', for Microsoft SQL 'mssql', for MySQL 'mysql'
+* for example Microsoft SQL Seerver will: $dbUtils=new DbUtils('mssql');
+*/
 
 $dbUtils=new DbUtils();
 
