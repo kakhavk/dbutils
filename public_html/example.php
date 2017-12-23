@@ -12,6 +12,17 @@ define('CLASSES_DIR',INCLUDE_DIR.'/classes');
 
 require_once 'params.php';
 
+$dbMapper=new DbMapper(array(
+	'type'=>'mysql',
+	'host'=>DBHOST,
+	'name'=>DBNAME,
+	'user'=>DBUSER,
+	'password'=>DBPASS,
+	'port'=>3306
+));
+
+Db::init($dbMapper->getDbparams(), $dbMapper->getDb());
+
 require_once 'include/classes/DbUtils/Db.php';
 require_once 'include/classes/DbUtils/DbMapper.php';
 require_once 'include/classes/DbUtils/Helper/HelperDb.php';
