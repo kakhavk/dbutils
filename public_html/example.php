@@ -28,7 +28,7 @@ require_once 'include/classes/DbUtils/DbMapper.php';
 require_once 'include/classes/DbUtils/Helper/HelperDb.php';
 
 
-DbUtils\Db::init($dbMapper->getDbparams(), $dbMapper->getDb());
+Db::init($dbMapper->getDbparams(), $dbMapper->getDb());
 
 
 Retrieve one row from table users:
