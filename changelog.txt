@@ -1,3 +1,24 @@
+--------------------------------------------------------------------------------------------------------------------------------------
+Added new classes which could be used instead DbUtils.php
+These classes are located at include/classes/DbUtils/ folder
+
+The main class is Db.php which depends on DbMapper class and includes static functions 
+Also created HelperDb class which has methods which isusefull when inserting or updating values in table
+
+changes for DbUtils\Db.php
+released version 1.0 which has methods used in old DbUtils.php
+
+changes for DbUtils\DbMapper.php
+released version 0.1
+
+changes for DbUtils\Helper\HelperDb.php
+released version 0.1
+
+
+
+-----------------------
+changes for DbUtils.php
+
 Version 2.2.1
 * fixed Microsoft SQL server support
 Version 2.2
