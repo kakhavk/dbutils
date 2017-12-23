@@ -21,7 +21,7 @@ class HelperDb{
         $retStr="";
         $dbType=self::$retDbType();
         
-        if(!HiUtils::isEmpty($value)){
+        if(!empty($value)){
 			
 			if($dbType=="mysql"){
 				if($value=="false" || $value=="f") $retStr="0";
