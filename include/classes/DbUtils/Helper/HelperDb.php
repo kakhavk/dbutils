@@ -41,11 +41,12 @@ class HelperDb{
     }
     
     /* Returns string or null
+     * also encodes string if needed
      * Since 0.10
      */
-     public static function strNull($str, $params=array())
+    public static function strNull($str, $params=array())
     {
-		$paramsLocal=array('addslashes'=>false,'htmlspecialchars'=>false);
+		$paramsLocal=array('addslashes'=>true,'htmlspecialchars'=>true);
 		
 		if(isset($params['addslashes'])){
 			$paramsLocal['addslashes']=$params['addslashes'];
@@ -66,6 +67,33 @@ class HelperDb{
             return "'".$str."'";
         }
         return "NULL";
+    }
+    
+    /* Returns decoded string
+     */
+    public static function strDecode($str, $params=array())
+    {
+		$paramsLocal=array('stripslashes'=>true,'htmlspecialchars_decode'=>true);
+		
+		if(isset($params['stripslashes'])){
+			$paramsLocal['stripslashes']=$params['stripslashes'];
+		}
+		
+		if(isset($params['htmlspecialchars_decode'])){
+			$paramsLocal['htmlspecialchars_decode']=$params['htmlspecialchars_decode'];
+		}
+		
+        if (!empty($str)) {
+            $str=trim($str);
+            if ($paramsLocal['stripslashes']===true) {
+                $str = stripslashes($str);
+            }
+            if ($paramsLocal['htmlspecialchars_decode']===true) {
+                $str = htmlspecialchars_decode($str);
+            }
+        }
+        
+        return $str;
     }
     
     /* Returns integer or null
