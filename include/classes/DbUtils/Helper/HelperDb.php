@@ -43,13 +43,27 @@ class HelperDb{
     /* Returns string or null
      * Since 0.10
      */
-    public static function strNull($str, $addslashes=0)
+     public static function strNull($str, $params=array())
     {
-        if (!is_null($str) && $str !== "") {
-            if ($addslashes==0) {
+		$paramsLocal=array('addslashes'=>false,'htmlspecialchars'=>false);
+		
+		if(isset($params['addslashes'])){
+			$paramsLocal['addslashes']=$params['addslashes'];
+		}
+		
+		if(isset($params['htmlspecialchars'])){
+			$paramsLocal['htmlspecialchars']=$params['htmlspecialchars'];
+		}
+		
+        if (!empty($str)) {
+            $str=trim($str);
+            if ($paramsLocal['addslashes']===true) {
                 $str = addslashes($str);
             }
-            return trim("'" . $str . "'");
+            if ($paramsLocal['htmlspecialchars']===true) {
+                $str = htmlspecialchars($str);
+            }
+            return "'".$str."'";
         }
         return "NULL";
     }
