@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.0
+# Version 1.1
 
 namespace DbUtils;
 
@@ -23,31 +23,37 @@ class Db{
     protected static $attrEmulatePrepares = 0; // needed for supporting multiple queries
     protected static $errorMessages = array();
     protected static $error = false;
-	
+    
     protected static $dsn = null;
-
+    
     public static $endLine="<br />";
     
     private static $db = null;
     private static $dbParams = array();
     
+    
+    private static $params=array(
+        'dateFrom'=>'dd/mm/yyyy',
+        'dateTo'=>'yyyy/mm/dd'
+    );
+    
     public static function init($params=array(), $dbPdo)
     {
-		self::$dbParams=$params;
-		if(empty($_SERVER['HTTP_HOST'])){
-			self::$endLine="\n";
-		}
-
-       self::$db=$dbPdo;
-       
+        self::$dbParams=$params;
+        if(empty($_SERVER['HTTP_HOST'])){
+            self::$endLine="\n";
+        }
+        
+        self::$db=$dbPdo;
+        
     }
-
+    
     
     /* Returns Database Type: mysql or pgsql */
     public static function getDbType()
     {
         return self::$dbParams['type'];
-    }     
+    }
     
     /* Set ATTR_EMULATE_PREPARES for connection */
     public static function setAttrEmulatePrepares($value)
@@ -79,9 +85,9 @@ class Db{
     {
         if (isset($options) && is_array($options) && !is_null($options))
             self::$options = $options;
-        else
-            self::addErrorMessage('options was not set properly');
-        
+            else
+                self::addErrorMessage('options was not set properly');
+                
     }
     /* Get connection options */
     public static function getOptions()
@@ -89,27 +95,27 @@ class Db{
         return self::$options;
     }
     
-	/* Set or change parameter value */
+    /* Set or change parameter value */
     public static function setParam($key, $value){
-		if(!empty($key)) self::$params[$key]=$value;
+        if(!empty($key)) self::$params[$key]=$value;
     }
     
     /* Set or change parameter values */
     public static function setParams($params){
-		foreach($params as $key => $value){
-			if(!empty($key)) self::$params[$key]=$value;
-		}
-    }   
-    
-    /* Retrieve parameters */ 
-    public static function getDbParams(){
-		return self::$params;
+        foreach($params as $key => $value){
+            if(!empty($key)) self::$params[$key]=$value;
+        }
     }
     
-    /* Retrieve parameters */ 
+    /* Retrieve parameters */
+    public static function getDbParams(){
+        return self::$params;
+    }
+    
+    /* Retrieve parameters */
     public static function getDbParam($key){
-		return self::$params[$key];
-    }        
+        return self::$params[$key];
+    }
     
     /* Set port for connection */
     public static function setPort($value)
@@ -123,21 +129,21 @@ class Db{
         return self::$dbParams['port'];
     }
     
-	/* Set error message string */
+    /* Set error message string */
     public static function setErrorMessage($message)
     {
-    
-		self::$errorMessages=array();
+        
+        self::$errorMessages=array();
         self::$errorMessages[0]=$message;
         self::setError(true);
-    }      
+    }
     
     /* Add error message string */
     public static function addErrorMessage($message)
     {
         array_push(self::$errorMessages, $message);
         self::setError(true);
-    }  
+    }
     
     /* Get error message string */
     public static function getErrorMessage($formatted = 1)
@@ -148,8 +154,8 @@ class Db{
         for ($i = 0; $i < count($errorMessages); $i++) {
             if ($formatted == 1)
                 $str .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
-            else
-                $str .= $errorMessages[$i] . "\n";
+                else
+                    $str .= $errorMessages[$i] . "\n";
         }
         
         return $str;
@@ -175,9 +181,9 @@ class Db{
         if (!is_null($likeIndex) && $likeIndex != 0) {
             if ($likeIndex == 1)
                 $str = '%' . $value . '%'; // like is any
-            elseif ($likeIndex == 2)
+                elseif ($likeIndex == 2)
                 $str = $value . '%'; // like is left
-            elseif ($likeIndex == 3)
+                elseif ($likeIndex == 3)
                 $str = '%' . $value; // like is right
         }
         return $str;
@@ -191,9 +197,9 @@ class Db{
         if (!is_null($notLikeIndex) && $notLikeIndex != 0) {
             if ($notLikeIndex == 1)
                 $str = '%' . $value . '%'; // like is any
-            elseif ($notLikeIndex == 2)
+                elseif ($notLikeIndex == 2)
                 $str = $value . '%'; // like is left
-            elseif ($notLikeIndex == 3)
+                elseif ($notLikeIndex == 3)
                 $str = '%' . $value; // like is right
         }
         return $str;
@@ -223,20 +229,20 @@ class Db{
                     
                     if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
                         $bindValue = self::like($bindValue, $bindValues['fields'][$i]['like']);
-                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
-                        $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                    
-                    $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+                        if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                            $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                            
+                            $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
                 }
             } elseif (isset($bindValues['name'])) {
                 $bindValue = $bindValues["value"];
                 
                 if (isset($bindValues['like']) && !is_null($bindValues['like']))
                     $bindValue = self::like($bindValue, $bindValues['like']);
-                if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
-                    $bindValue = self::notLike($bindValue, $bindValues['notLike']);
-                
-                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+                    if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                        $bindValue = self::notLike($bindValue, $bindValues['notLike']);
+                        
+                        $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
             }
         }
         $stmt->execute();
@@ -247,9 +253,9 @@ class Db{
                 return $number;
             }
         }
-        catch (Exception $exception) {
+        catch (\PDOException $exception) {
             self::addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            throw new \Exception($exception->getCode() . " " . $exception->getMessage());
         }
         return $number;
     }
@@ -265,14 +271,14 @@ class Db{
         
         $bindValue = null;
         /*
-        $fetchMode = PDO_FETCH_ASSOC;
-        if (!is_null($fetch_mode)) {
-            $fetchMode = $fetch_mode;
-        }
-        */
+         $fetchMode = PDO_FETCH_ASSOC;
+         if (!is_null($fetch_mode)) {
+         $fetchMode = $fetch_mode;
+         }
+         */
         
         
-
+        
         try {
             $stmt = self::$db->prepare($sqlStr);
             
@@ -282,38 +288,38 @@ class Db{
                     
                     if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
                         $bindValue = self::like($bindValue, $bindValues['fields'][$i]['like']);
-                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
-                        $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                    
-                    $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+                        if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                            $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                            
+                            $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
                 }
             } elseif (isset($bindValues['name'])) {
                 $bindValue = $bindValues["value"];
                 
                 if (isset($bindValues['like']) && !is_null($bindValues['like']))
                     $bindValue = self::like($bindValue, $bindValues['like']);
-                if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
-                    $bindValue = self::notLike($bindValue, $bindValues['notLike']);
-                
-                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+                    if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                        $bindValue = self::notLike($bindValue, $bindValues['notLike']);
+                        
+                        $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
             }
-
+            
             
             $stmt->execute();
-
-
+            
+            
             if (false !== ($row = $stmt->fetch(PDO_FETCH_ASSOC))) {
                 unset($stmt);
                 return $row;
             }
-
+            
         }
-        catch (Exception $exception) {
+        catch (\PDOException $exception) {
             self::addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            throw new \Exception($exception->getCode() . " " . $exception->getMessage());
         }
         return null;
-
+        
     }
     
     /* Fetch sql records or null if error detected
@@ -334,7 +340,7 @@ class Db{
             
             if ($dbType == 'mysql')
                 $sqlStr .= " limit :min, :max";
-            elseif ($dbType == 'pgsql')
+                elseif ($dbType == 'pgsql')
                 $sqlStr .= " limit :max offset :min";
         }
         
@@ -347,10 +353,10 @@ class Db{
                 
                 if (isset($bindValues['fields'][$i]['like']) && !is_null($bindValues['fields'][$i]['like']))
                     $bindValue = self::like($bindValue, $bindValues['fields'][$i]['like']);
-                if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
-                    $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
-                
-                $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
+                    if (isset($bindValues['fields'][$i]['notLike']) && !is_null($bindValues['fields'][$i]['notLike']))
+                        $bindValue = self::notLike($bindValue, $bindValues['fields'][$i]['notLike']);
+                        
+                        $stmt->bindValue($bindValues['fields'][$i]['name'], $bindValue, $bindValues['fields'][$i]['dataType']);
             }
         } elseif (isset($bindValues['name'])) {
             
@@ -358,10 +364,10 @@ class Db{
             
             if (isset($bindValues['like']) && !is_null($bindValues['like']))
                 $bindValue = self::like($bindValue, $bindValues['like']);
-            if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
-                $bindValue = self::notLike($bindValue, $bindValues['notLike']);
-            
-            $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+                if (isset($bindValues['notLike']) && !is_null($bindValues['notLike']))
+                    $bindValue = self::notLike($bindValue, $bindValues['notLike']);
+                    
+                    $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
         }
         
         if (isset($bindValues['offset']) && is_array($bindValues['offset'])) {
@@ -377,9 +383,9 @@ class Db{
                 return $rows;
             }
         }
-        catch (Exception $exception) {
+        catch (\PDOException $exception) {
             self::addErrorMessage("Error: code:" . $exception->getCode() . ", info:" . $exception->getMessage());
-            throw new Exception($exception->getCode() . " " . $exception->getMessage());
+            throw new \Exception($exception->getCode() . " " . $exception->getMessage());
         }
         
         return null;
@@ -409,15 +415,15 @@ class Db{
                 
                 if (!empty($bindValues['like']))
                     $bindValue = self::like($bindValue, $bindValues['like']);
-                if (!empty($bindValues['notLike']))
-                    $bindValue = self::notLike($bindValue, $bindValues['notLike']);
-                
-                $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
+                    if (!empty($bindValues['notLike']))
+                        $bindValue = self::notLike($bindValue, $bindValues['notLike']);
+                        
+                        $stmt->bindValue($bindValues['name'], $bindValue, $bindValues['dataType']);
             }
             
             $stmt->execute();
         }
-        catch (Exception $pdoe) {
+        catch (\PDOException $pdoe) {
             self::addErrorMessage("Error insert or updating table:\n" . $sqlStr . "\n" . $pdoe->getMessage());
             self::setError(true);
         }
@@ -430,7 +436,7 @@ class Db{
         $ret = self::update($sqlStr, $bindValues);
         if (self::getDbType() == "mysql")
             return self::$db->lastInsertId();
-        return $ret;
+            return $ret;
     }
     
     /* Unset connection object */
@@ -494,7 +500,7 @@ class Db{
     {
         if (!is_null($row) && is_array($row) && count($row) > 0)
             return true;
-        return false;
+            return false;
     }
     
     /* This returned  sql limitation code can be add at last of sql string and when changing database type this will changed automaticaly */
@@ -508,5 +514,263 @@ class Db{
         return $str[$dbType];
     }
     
+    /* Returns decoded string
+     */
+    public static function strDecode($str, $params=array())
+    {
+        $paramsLocal=array(
+            'stripslashes'=>true,
+            'htmlspecialchars_decode'=>true
+        );
+        
+        if(isset($params['stripslashes'])){
+            $paramsLocal['stripslashes']=$params['stripslashes'];
+        }
+        
+        if(isset($params['htmlspecialchars_decode'])){
+            $paramsLocal['htmlspecialchars_decode']=$params['htmlspecialchars_decode'];
+        }
+        
+        if (!empty($str)) {
+            $str=trim($str);
+            if ($paramsLocal['stripslashes']===true) {
+                $str = stripslashes($str);
+            }
+            if ($paramsLocal['htmlspecialchars_decode']===true) {
+                $str = htmlspecialchars_decode($str);
+            }
+        }
+        
+        return $str;
+    }
+    
+    /* For mysql true and false is 0 and 1 for postgresql true and false so it will change by database type values
+     * For example:
+     * insert into table (id, active) values (12, retBooleanCondition(1));
+     * where active is boolean type field inserts in mysql 1 and postgresql true
+     */
+    public static function setBoolean($value=null){
+        $retStr="";
+        $dbType=self::getDbType();
+        
+        if(!empty($value)){
+            
+            if($dbType=="mysql"){
+                if($value=="false" || $value=="f") $retStr="0";
+                elseif($value=="true" || $value=="t") $retStr="1";
+                else $retStr=$value;
+            }elseif($dbType=="pgsql"){
+                if((is_bool($value) && $value===false) || $value==0) $retStr="false";
+                elseif((is_bool($value) && $value===true) || $value==1) $retStr="true";
+                else $retStr=$value;
+            }
+        }else{
+            if($dbType=="mysql") $retStr="0";
+            elseif($dbType=="pgsql") $retStr="false";
+        }
+        
+        return $retStr;
+    }
+    
+    /* Returns string or null
+     * also encodes string if needed
+     * Since 0.10
+     */
+    public static function setString($str, $params=array())
+    {
+        
+        $paramsLocal=array(
+            'addslashes'=>true,
+            'htmlspecialchars'=>true,
+            'defaultReturnValue'=>"NULL"
+        );
+        
+        if(isset($params['addslashes'])){
+            $paramsLocal['addslashes']=$params['addslashes'];
+        }
+        
+        if(isset($params['htmlspecialchars'])){
+            $paramsLocal['htmlspecialchars']=$params['htmlspecialchars'];
+        }
+        
+        if (!empty($str)) {
+            $str=trim($str);
+            if ($paramsLocal['addslashes']===true) {
+                $str = addslashes($str);
+            }
+            if ($paramsLocal['htmlspecialchars']===true) {
+                $str = htmlspecialchars($str);
+            }
+            return "'".$str."'";
+        }
+        
+        if(isset($params['defaultReturnValue'])){
+            $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
+        }
+        
+        return $paramsLocal['defaultReturnValue'];
+    }
+    
+    
+    /* Returns integer or null
+     * Since 0.10
+     */
+    public static function setInt($digit, $params=array())
+    {
+        
+        $paramsLocal=array(
+            'defaultReturnValue'=>"NULL"
+        );
+        
+        if(isset($params['defaultReturnValue'])){
+            $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
+        }
+        
+        if (isset($digit) && HelperDb::isInt($digit)===true){
+            return (int)$digit;
+        }
+        return paramsLocal['defaultReturnValue'];
+    }
+    
+    /* Returns double or null
+     * Since 0.10
+     */
+    public static function setDouble($digit, $params=array())
+    {
+        $paramsLocal=array(
+            'defaultReturnValue'=>'NULL',
+            'allowZero'=>false
+        );
+        
+        if(isset($params['defaultReturnValue'])){
+            $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
+        }
+        
+        if(isset($digit)){
+            
+            if(HelperDb::isDouble($digit)===false){
+                return false;
+            }
+            
+            if('allowZero'===false){
+                if(doubleval($digit)==0.00){
+                    return false;
+                }
+            }
+            
+            return $digit;
+        }
+        return paramsLocal['defaultReturnValue'];
+    }
+    
+    
+    /**
+     * Parse date and change format, or return null if is not set properly
+     * $date must with yyyy format for year and not yy, month and day must with two simbol format : dd/mm/yyyy,
+     * default parameters is set to $params array with dateFrom and dateTo formats
+     * @return format date
+     * default values in params:
+     *	'dateFrom'='dd/mm/yyyy'
+     *	'dateTo'='yyyy/mm/dd'
+     *	'dateFromSeparator'='/'
+     *	'dateToSeparator'='/'
+     * Custom usage:
+     * setParam('dateFrom','yyyy-mm-dd');
+     * setParam('dateTo','mm/yyyy/dd');
+     */
+    public static function formatDate($date, $params=array()){
+        
+        $dateFrom=array();
+        $dateTo=array();
+        
+        $dateFromSeparator=null;
+        $dateToSeparator=null;
+        
+        $dateFrom2=array();
+        $dateTo2=array();
+        
+        $dateExplode=array();
+        $parsedDate=null;
+        
+        $tmpArray=array();
+        $tmpInt=null;
+        
+        $paramsLocal=array(
+            'defaultReturnValue'=>"NULL",
+            'returnQuoted'=>true
+        );
+        
+        if(isset($params['defaultReturnValue'])){
+            $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
+        }
+        
+        if(isset($params['returnQuoted'])){
+            $paramsLocal['returnQuoted']=$params['returnQuoted'];
+        }
+        
+        if(empty($date) || trim($date)==""){
+            return $paramsLocal['defaultReturnValue'];
+        }
+        
+        if(!empty(self::$params['dateFrom']) && trim(self::$params['dateFrom'])!==''){
+            
+            $dateFromSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', self::$params['dateFrom']))),0, 1);
+            $dateFrom=array();
+            $tmpArray=explode($dateFromSeparator, self::$params['dateFrom']);
+            
+            for($i=0; $i<count($tmpArray); $i++){
+                $dateFrom[$i]=$tmpArray[$i];
+            }
+            
+        }
+        
+        
+        if(!empty(self::$params['dateTo']) && trim(self::$params['dateTo'])!==''){
+            $dateToSeparator=substr(trim((preg_replace('/[a-zA-Z]/','', self::$params['dateTo']))),0, 1);
+            $dateTo=array();
+            $tmpArray=explode($dateToSeparator, self::$params['dateTo']);
+            
+            foreach($tmpArray as $key => $value){
+                $dateTo[$key]=$value;
+            }
+        }
+        
+        foreach($dateTo as $key => $value){
+            $dateTo2[$value]=null;
+        }
+        
+        
+        if(!empty($date) && trim($date)!==''){
+            
+            $dateExplode=explode($dateFromSeparator, $date);
+            if(count($dateExplode)==3){
+                
+                for($i=0; $i<3; $i++){
+                    $tmpInt=$dateFrom[$i];
+                    $dateFrom2[$tmpInt]=$dateExplode[$i];
+                }
+                
+                foreach($dateFrom2 as $key => $value){
+                    $dateTo2[$key]=$value;
+                }
+                
+                $parsedDate='';
+                $i=0;
+                foreach($dateTo2 as $key => $value){
+                    if($i!=0) $parsedDate.=$dateToSeparator;
+                    $parsedDate.=$dateTo2[$key];
+                    $i++;
+                }
+                
+            }
+            if(!empty($parsedDate) && trim($parsedDate)!=='') $date=$parsedDate;
+        }
+        
+        if($paramsLocal['returnQuoted']===true){
+            $date="'".$date."'";
+        }
+        
+        return $date;
+    }
 }
 ?>

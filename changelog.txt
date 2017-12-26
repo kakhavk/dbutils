@@ -1,4 +1,12 @@
 --------------------------------------------------------------------------------------------------------------------------------------
+Dixes to Db and HelperDb class
+changeds for DbUtils\Db.php
+moved methods from DbHelper to Db
+
+changeds for Helper\HelperDb.php
+added type check methods
+
+
 Added new classes which could be used instead DbUtils.php
 These classes are located at include/classes/DbUtils/ folder
 
