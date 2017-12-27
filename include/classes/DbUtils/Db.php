@@ -431,12 +431,23 @@ class Db{
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    public static function insert($sqlStr, $bindValues = array())
+    /* Executes query for insert and if database type is mysql returns last inserted id */
+    public static function insert($sqlStr, $bindValues = array(), $params=array())
     {
-        $ret = self::update($sqlStr, $bindValues);
-        if (self::getDbType() == "mysql")
+        $paramsLocal=array(
+            'returnlastInsertId'=>true
+        );
+        
+        if(isset($params['returnlastInsertId']) && is_bool($params['returnlastInsertId'])){
+            $paramsLocal['returnlastInsertId']=$params['returnlastInsertId'];
+        }
+
+        $stmt = self::update($sqlStr, $bindValues);
+        if ($paramsLocal['returnlastInsertId']===true && self::getDbType() == "mysql"){
             return self::$db->lastInsertId();
-            return $ret;
+        }
+        
+        return $stmt;
     }
     
     /* Unset connection object */
