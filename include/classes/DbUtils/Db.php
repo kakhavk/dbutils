@@ -216,11 +216,6 @@ class Db{
         $stmt      = null;
         $bindValue = null;
         
-        $fetchMode = PDO_FETCH_ASSOC;
-        if (!is_null($fetch_mode)) {
-            $fetchMode = $fetch_mode;
-        }
-        
         $stmt = self::$db->prepare($sqlStr);
         if (isset($bindValues) && is_array($bindValues)) {
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
