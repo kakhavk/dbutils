@@ -640,7 +640,7 @@ class Db{
         if (isset($digit) && HelperDb::isInt($digit)===true){
             return (int)$digit;
         }
-        return paramsLocal['defaultReturnValue'];
+        return $paramsLocal['defaultReturnValue'];
     }
     
     /* Returns double or null
@@ -671,7 +671,7 @@ class Db{
             
             return $digit;
         }
-        return paramsLocal['defaultReturnValue'];
+        return $paramsLocal['defaultReturnValue'];
     }
     
     

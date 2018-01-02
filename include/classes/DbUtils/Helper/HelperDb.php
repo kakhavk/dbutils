@@ -23,7 +23,7 @@ class HelperDb{
 		$item=null;
 		$itemExplode=array();
 		
-		if(isset($name) && !empty((double)$name) && trim($name)!==""){
+		if(isset($name) && !empty($name) && trim($name)!==""){
 			$item=$name;
 		}
 		if(!is_null($item)){
