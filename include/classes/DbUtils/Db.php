@@ -514,6 +514,7 @@ class Db{
     {
         $dbType       = self::getDbType();
         $str          = array();
+        
         $str['mysql'] = " limit " . (isset($min)?$min:0) . ", " . $max;
         $str['pgsql'] = " limit " . $max . " offset " . (isset($min)?$min:0);
         
