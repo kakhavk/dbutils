@@ -448,7 +448,7 @@ class Db{
     /* Unset connection object */
     public static function close()
     {
-        self::$object = null;
+        self::$db = null;
     }
     /* get next sequence value
      * Since 0.10
