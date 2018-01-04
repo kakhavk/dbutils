@@ -704,7 +704,9 @@ class Db{
         
         $paramsLocal=array(
             'defaultReturnValue'=>"NULL",
-            'returnQuoted'=>true
+            'returnQuoted'=>true,
+            'returnNull'=>false,
+            'returnEmpty'=>false
         );
         
         if(isset($params['defaultReturnValue'])){
@@ -715,7 +717,24 @@ class Db{
             $paramsLocal['returnQuoted']=$params['returnQuoted'];
         }
         
+        if(isset($params['returnNull'])){
+            $paramsLocal['returnNull']=$params['returnNull'];
+        }
+        
+        if(isset($params['returnEmpty'])){
+            $paramsLocal['returnEmpty']=$params['returnEmpty'];
+        }
+        
         if(empty($date) || trim($date)==""){
+            
+            if($paramsLocal['returnNull']===true){
+                return null;
+            }
+            
+            if($paramsLocal['returnEmpty']===true){
+                return "";
+            }
+            
             return $paramsLocal['defaultReturnValue'];
         }
         
@@ -775,7 +794,7 @@ class Db{
         
         if($paramsLocal['returnQuoted']===true){
             $date="'".$date."'";
-        }
+        }        
         
         return $date;
     }
