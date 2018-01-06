@@ -449,7 +449,6 @@ class Db{
     public static function close()
     {
         self::$db = null;
-        unset(self::$db);
     }
     /* get next sequence value
      * Since 0.10
