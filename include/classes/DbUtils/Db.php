@@ -146,16 +146,17 @@ class Db{
     }
     
     /* Get error message string */
-    public static function getErrorMessage($formatted = 1)
+    public static function getErrorMessage($formatted)
     {
         $str           = '';
         $errorMessages = self::$errorMessages;
         
         for ($i = 0; $i < count($errorMessages); $i++) {
-            if ($formatted == 1)
+            if ($formatted === true){
                 $str .= '<div class="errormessage">' . $errorMessages[$i] . '</div>';
-                else
-                    $str .= $errorMessages[$i] . "\n";
+            }else{
+                $str .= $errorMessages[$i] . "\n";
+            }
         }
         
         return $str;
@@ -422,6 +423,11 @@ class Db{
             self::addErrorMessage("Error insert or updating table:\n" . $sqlStr . "\n" . $pdoe->getMessage());
             self::setError(true);
         }
+        
+        if(self::getError()===true){
+			return null;
+        }
+        
         return $stmt;
     }
     
