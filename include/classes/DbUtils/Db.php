@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.2
+# Version 1.3
 
 namespace DbUtils;
 
@@ -17,7 +17,7 @@ define('NOT_LIKE_LEFT', 2);
 define('NOT_LIKE_RIGHT', 3);
 
 class Db{
-    
+
     protected static $dbType = null; // by default set to mysql. can be changed to mysql, pgsql, mssql ...
     
     protected static $attrEmulatePrepares = 0; // needed for supporting multiple queries
@@ -46,6 +46,7 @@ class Db{
         
         self::$db=$dbPdo;
         
+        self::setSearchPath();
     }
     
     
@@ -105,6 +106,18 @@ class Db{
         foreach($params as $key => $value){
             if(!empty($key)) self::$params[$key]=$value;
         }
+    }
+    
+    /* Set search path for db wchich supports search_path: PostgreSQL etc... */
+    public function setSearchPath(){
+        $stmt=null;
+        if(isset(self::$dbParams['search_path'])){
+            if(self::$dbParams['type']=='pgsql'){
+                $stmt=self::$db->prepare("SET search_path TO ".self::$dbParams['search_path']);
+                $stmt->execute();
+            }
+        }
+        
     }
     
     /* Retrieve parameters */
@@ -217,6 +230,7 @@ class Db{
         $stmt      = null;
         $bindValue = null;
         
+       
         $stmt = self::$db->prepare($sqlStr);
         if (isset($bindValues) && is_array($bindValues)) {
             if (isset($bindValues['fields']) && is_array($bindValues['fields'])) {
@@ -418,14 +432,14 @@ class Db{
             }
             
             $stmt->execute();
-        }
-        catch (\PDOException $pdoe) {
+            
+        }catch (\PDOException $pdoe) {            
             self::addErrorMessage("Error insert or updating table:\n" . $sqlStr . "\n" . $pdoe->getMessage());
             self::setError(true);
         }
         
         if(self::getError()===true){
-			return null;
+            return null;
         }
         
         return $stmt;
@@ -436,7 +450,7 @@ class Db{
     public static function insert($sqlStr, $bindValues = array(), $params=array())
     {
         $paramsLocal=array(
-            'returnlastInsertId'=>true
+            'returnlastInsertId'=>self::$dbParams['returnlastInsertId']
         );
         
         if(isset($params['returnlastInsertId']) && is_bool($params['returnlastInsertId'])){
@@ -444,6 +458,7 @@ class Db{
         }
 
         $stmt = self::update($sqlStr, $bindValues);
+        
         if ($paramsLocal['returnlastInsertId']===true && self::getDbType() == "mysql"){
             return self::$db->lastInsertId();
         }
@@ -520,7 +535,6 @@ class Db{
     {
         $dbType       = self::getDbType();
         $str          = array();
-        
         $str['mysql'] = " limit " . (isset($min)?$min:0) . ", " . $max;
         $str['pgsql'] = " limit " . $max . " offset " . (isset($min)?$min:0);
         
@@ -642,6 +656,7 @@ class Db{
         if (isset($digit) && HelperDb::isInt($digit)===true){
             return (int)$digit;
         }
+        
         return $paramsLocal['defaultReturnValue'];
     }
     
@@ -803,6 +818,6 @@ class Db{
         }        
         
         return $date;
-    }
+    }    
 }
 ?>

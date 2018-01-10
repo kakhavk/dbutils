@@ -8,42 +8,109 @@ namespace DbUtils\Helper;
 
 class HelperDb{
 
-    public static function isInt($name){
-		$item=null;
-
-		if(!empty($name)){
-			if(ctype_digit((string)$name)===true){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public static function isDouble($name){
-		$item=null;
-		$itemExplode=array();
+	private $db = null;
+	private $dsn = null;
+    private $dbParams = array();
+    private $options=array(
+		PDO::ATTR_TIMEOUT => 30, 
+		PDO::ATTR_PERSISTENT => true, 
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, 
+		PDO::ATTR_EMULATE_PREPARES => 0
+    );
+    
+    public function __construct($params){
+		$dbtype=null;
+		$dbParams=array(
+			'type'=>null,
+			'host'=>null,
+			'name'=>null,
+			'user'=>null,
+			'password'=>null,
+			'port'=>null,		    
+		    'search_path'=>null,
+		    'returnlastInsertId'=>true
+		);
 		
-		if(isset($name) && !empty($name) && trim($name)!==""){
-			$item=$name;
-		}
-		if(!is_null($item)){
-			$item=str_replace(',','.',$item);
-			if(is_numeric($item)===false){
-				return false;
-			}
-									
-			$itemExplode=explode('.',$item);
-			if(count($itemExplode)==1){
-				return false;
-			}
-			
-			for($i=0; $i<count($itemExplode); $i++){
-				if(ctype_digit((string)$itemExplode[$i])===false){
-					return false;
+		$dbParamsRequired=array(
+			'type',
+			'host',
+			'name',
+			'user'
+		);
+		
+		if(!empty($params) && is_array($params)){
+			foreach($dbParams as $k => $v){
+				
+				if(isset($params[$k])){
+					$dbParams[$k]=$params[$k];
 				}
-			}			
-			return true;
+			}
 		}
-		return false;
-	}
+		
+        foreach($dbParamsRequired as $k){
+			if(is_null($dbParams[$k])){
+				return false;
+			}
+        }
+		
+		$this->dbParams=$params;		
+		
+		$dbtype = strtolower(trim($this->dbParams['type']));
+        if ($dbtype == 'microsoftsql')
+            $dbtype = 'mssql';
+        if ($dbtype == 'mysqli')
+            $dbtype = 'mysql';
+        if ($dbtype == 'postgresql')
+            $dbtype = 'pgsql';
+		$dbParams['type']=$dbtype;
+        $this->dbParams['type'] = $dbParams['type'];
+        
+        if (is_null($this->dsn)){
+			$this->dsn = $dbParams['type'] . ':host=' . $dbParams['host'] . (!is_null($dbParams['port']) ? ';port=' . $dbParams['port'] : '') . ';dbname=' . $dbParams['name'];
+			if ($dbParams['type'] == 'mssql') {
+				$this->options=null;
+				$this->dsn='dblib:host=' . $dbParams['host'] . (!is_null($dbParams['port']) ? ':' . $dbParams['port'] : '') . ';dbname=' . $dbParams['name'];
+			}
+		}        
+		
+		$this->db=new Pdo($this->dsn, $dbParams['user'], $dbParams['password'], $this->options);
+		
+		if ($this->dbParams['type'] == "mysql") {
+			$this->db->prepare("SET NAMES 'utf8'")->execute();
+		}
+    }
+    
+    public function getDb(){
+		return $this->db;
+    }
+    
+    public function getDbParams(){
+		return $this->dbParams;
+    }
+    
+    public function addDbParams($params=array()){
+        foreach($params as $k=>$v){
+            if(!isset($this->dbParams[$k])){
+                $this->dbParams[$k]=$v;
+            }
+        }
+    }
+    
+    public function addDbParam($key, $value){
+        if(!isset($this->dbParams[$key])){
+            $this->dbParams[$key]=$value;
+        }
+    }
+    
+    public function setDbParams($params=array()){
+        foreach($params as $k=>$v){
+            $this->dbParams[$k]=$v;
+        }
+    }
+    
+    public function setDbParam($key, $value){
+        $this->dbParams[$key]=$value;
+    }
+
 }
