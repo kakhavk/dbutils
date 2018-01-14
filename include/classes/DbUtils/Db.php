@@ -544,8 +544,8 @@ class Db{
                 $str['mysql'] = " limit " .$min;
                 $str['pgsql'] = " limit ".$min;
             }elseif(!isset($min) && isset($max)){
-                $str['mysql'] = " limit " .$min;
-                $str['pgsql'] = " limit ".$min;
+                $str['mysql'] = " limit " .$max;
+                $str['pgsql'] = " limit ".$max;
             }
         }
         
