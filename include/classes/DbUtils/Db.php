@@ -534,9 +534,21 @@ class Db{
     public static function limitStr($min, $max)
     {
         $dbType       = self::getDbType();
-        $str          = array();
-        $str['mysql'] = " limit " . (isset($min)?$min:0) . ", " . $max;
-        $str['pgsql'] = " limit " . $max . " offset " . (isset($min)?$min:0);
+        $str          = array('mysql'=>null,'pgsql'=>null);  
+        
+        if(isset($min) && isset($max)){
+            $str['mysql'] = " limit " .$min." , ".$max;
+            $str['pgsql'] = " limit ".$max." offset ".$min;
+        }else{
+            if(isset($min) && !isset($max)){
+                $str['mysql'] = " limit " .$min;
+                $str['pgsql'] = " limit ".$min;
+            }elseif(!isset($min) && isset($max)){
+                $str['mysql'] = " limit " .$min;
+                $str['pgsql'] = " limit ".$min;
+            }
+        }
+        
         
         return $str[$dbType];
     }
