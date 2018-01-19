@@ -595,8 +595,8 @@ class Db{
         if(!empty($value)){
             
             if($dbType=="mysql"){
-                if($value=="false" || $value=="f") $retStr="0";
-                elseif($value=="true" || $value=="t") $retStr="1";
+                if($value=="false" || $value=="f" || $value===false) $retStr="0";
+                elseif($value=="true" || $value=="t" || $value===true) $retStr="1";
                 else $retStr=$value;
             }elseif($dbType=="pgsql"){
                 if((is_bool($value) && $value===false) || $value==0) $retStr="false";
