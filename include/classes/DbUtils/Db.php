@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.3
+# Version 1.4
 
 namespace DbUtils;
 
@@ -718,7 +718,7 @@ class Db{
      * setParam('dateFrom','yyyy-mm-dd');
      * setParam('dateTo','mm/yyyy/dd');
      */
-    public static function formatDate($date, $params=array()){
+	public static function formatDate($date, $params=array()){
         
         $dateFrom=array();
         $dateTo=array();
@@ -739,23 +739,15 @@ class Db{
             'defaultReturnValue'=>"NULL",
             'returnQuoted'=>true,
             'returnNull'=>false,
-            'returnEmpty'=>false
+            'returnEmpty'=>false,
+            'time'=>null
         );
         
-        if(isset($params['defaultReturnValue'])){
-            $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
-        }
         
-        if(isset($params['returnQuoted'])){
-            $paramsLocal['returnQuoted']=$params['returnQuoted'];
-        }
-        
-        if(isset($params['returnNull'])){
-            $paramsLocal['returnNull']=$params['returnNull'];
-        }
-        
-        if(isset($params['returnEmpty'])){
-            $paramsLocal['returnEmpty']=$params['returnEmpty'];
+        foreach($paramsLocal as $k => $v){
+            if(isset($params[$k])){
+                $paramsLocal[$k]=$params[$k];
+            }
         }
         
         if(empty($date) || trim($date)==""){
@@ -825,11 +817,17 @@ class Db{
             if(!empty($parsedDate) && trim($parsedDate)!=='') $date=$parsedDate;
         }
         
+        if(!empty($date)){
+            if(isset($paramsLocal['time'])){
+                $date.=' '.$paramsLocal['time'];
+            }
+        }
+        
         if($paramsLocal['returnQuoted']===true){
             $date="'".$date."'";
         }        
         
         return $date;
-    }    
+    }  
 }
 ?>
