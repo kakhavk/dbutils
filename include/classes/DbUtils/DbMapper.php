@@ -2,7 +2,7 @@
 # Database Mapper class for initializing PDO Object
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 0.1
+# Version 0.2
 
 define('PDO_FETCH_LAZY',PDO::FETCH_LAZY);
 define('PDO_FETCH_ASSOC',PDO::FETCH_ASSOC);
@@ -44,7 +44,9 @@ class DbMapper{
 			'name'=>null,
 			'user'=>null,
 			'password'=>null,
-			'port'=>null
+			'port'=>null,		    
+		    'search_path'=>null,
+		    'returnlastInsertId'=>true
 		);
 		
 		$dbParamsRequired=array(
@@ -94,7 +96,6 @@ class DbMapper{
 		if ($this->dbParams['type'] == "mysql") {
 			$this->db->prepare("SET NAMES 'utf8'")->execute();
 		}
-		
     }
     
     public function getDb(){
@@ -103,5 +104,29 @@ class DbMapper{
     
     public function getDbParams(){
 		return $this->dbParams;
+    }
+    
+    public function addDbParams($params=array()){
+        foreach($params as $k=>$v){
+            if(!isset($this->dbParams[$k])){
+                $this->dbParams[$k]=$v;
+            }
+        }
+    }
+    
+    public function addDbParam($key, $value){
+        if(!isset($this->dbParams[$key])){
+            $this->dbParams[$key]=$value;
+        }
+    }
+    
+    public function setDbParams($params=array()){
+        foreach($params as $k=>$v){
+            $this->dbParams[$k]=$v;
+        }
+    }
+    
+    public function setDbParam($key, $value){
+        $this->dbParams[$key]=$value;
     }
 }

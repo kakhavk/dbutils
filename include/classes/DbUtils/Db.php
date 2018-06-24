@@ -2,7 +2,7 @@
 # Database PDO utilities for MySQL and PostgreSQL
 # Writen By Kakhaber Kashmadze <info@soft.ge>
 # Licensed under MIT License
-# Version 1.4
+# Version 1.5
 
 namespace DbUtils;
 
@@ -109,7 +109,7 @@ class Db{
     }
     
     /* Set search path for db wchich supports search_path: PostgreSQL etc... */
-    public function setSearchPath(){
+    public static function setSearchPath(){
         $stmt=null;
         if(isset(self::$dbParams['search_path'])){
             if(self::$dbParams['type']=='pgsql'){
@@ -446,7 +446,6 @@ class Db{
     }
     
     /* Executes query for insert and if database type is mysql returns last inserted id */
-    /* Executes query for insert and if database type is mysql returns last inserted id */
     public static function insert($sqlStr, $bindValues = array(), $params=array())
     {
         $paramsLocal=array(
@@ -686,9 +685,15 @@ class Db{
             $paramsLocal['defaultReturnValue']=$params['defaultReturnValue'];
         }
         
+        foreach($paramsLocal as $k => $v){
+            if(isset($params[$k])){
+                $paramsLocal[$k]=$params[$k];
+            }
+        }
         if(isset($digit)){
             
-            if(HelperDb::isDouble($digit)===false){
+
+            if(is_numeric($digit)===false){
                 return false;
             }
             
