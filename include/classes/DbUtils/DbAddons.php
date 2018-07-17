@@ -142,7 +142,6 @@ class DbAddons{
     
     /* Returns string or null
      * also encodes string if needed
-     * Since 0.10
      */
     public static function setString($str, $params=array())
     {
@@ -180,9 +179,7 @@ class DbAddons{
     }
     
     
-    /* Returns integer or null
-     * Since 0.10
-     */
+    /* Returns integer or null */
     public static function setInt($digit, $params=array())
     {
         
@@ -201,9 +198,7 @@ class DbAddons{
         return $paramsLocal['defaultReturnValue'];
     }
     
-    /* Returns double or null
-     * Since 0.10
-     */
+    /* Returns double or null */
     public static function setDouble($digit, $params=array())
     {
         $paramsLocal=array(
