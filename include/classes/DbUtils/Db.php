@@ -4,7 +4,7 @@
 # Licensed under MIT License
 # Version 1.5
 
-namespace DbUtils;
+namespace Shared\DbUtils;
 
 use DbUtils\Helper\HelperDb;
 
